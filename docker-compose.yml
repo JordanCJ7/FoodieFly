@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017" # Expose MongoDB on port 27017
+    volumes:
+      - mongod_data:/data/db # Persist MongoDB data
+
+  user-authentication:
+    build: ./user_authentication_service # Build the user-authentication service from the specified directory
+    ports:
+      - "5001:5001" # Expose the service on port 5001
+    depends_on:
+      - mongo # Ensure MongoDB starts before this service
+
+  restaurant-management:
+    build: ./restaurant_management_service # Build the restaurant-management service
+    ports:
+      - "5004:5004" # Expose the service on port 5004
+    depends_on:
+      - mongo # Ensure MongoDB starts before this service
+
+  order-management:
+    build: ./order_management_service # Build the order-management service
+    ports:
+      - "5003:5003" # Expose the service on port 5003
+    depends_on:
+      - mongo # Ensure MongoDB starts before this service
+
+  delivery-management:
+    build: ./delivery_management_service # Build the delivery-management service
+    ports:
+      - "5008:5008" # Expose the service on port 5008
+    depends_on:
+      - mongo # Ensure MongoDB starts before this service
+
+  payment-service:
+    build: ./payment_service # Build the payment-service
+    ports:
+      - "5010:5010" # Expose the service on port 5010
+    depends_on:
+      - mongo # Ensure MongoDB starts before this service
+
+  frontend:
+    build: ./frontend # Build the frontend service
+    ports:
+      - "3000:3000" # Expose the frontend on port 3000
+    environment:
+      - REACT_APP_USER_AUTHENTICATION_API_URL=http://user-authentication:5001 # API URL for user-authentication service
+      - REACT_APP_RESTAURANT_MANAGEMENT_API_URL=http://restaurant-management:5004 # API URL for restaurant-management service
+      - REACT_APP_ORDER_MANAGEMENT_API_URL=http://order-management:5003 # API URL for order-management service
+      - REACT_APP_DELIVERY_MANAGEMENT_API_URL=http://delivery-management:5008 # API URL for delivery-management service
+      - REACT_APP_PAYMENT_SERVICE_API_URL=http://payment-service:5010 # API URL for payment-service
+    depends_on:
+      - user-authentication # Ensure user-authentication starts before the frontend
+      - restaurant-management # Ensure restaurant-management starts before the frontend
+      - order-management # Ensure order-management starts before the frontend
+      - delivery-management # Ensure delivery-management starts before the frontend
+      - payment-service # Ensure payment-service starts before the frontend
+
+volumes:
+  mongod_data: # Named volume for MongoDB data persistence

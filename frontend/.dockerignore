@@ -1,0 +1,17 @@
+# Ignore node_modules (dependencies will be installed inside the container)
+node_modules/
+
+# Ignore version control files
+.git/
+.gitignore
+
+# Ignore documentation files
+README.md
+LICENSE
+
+# Ignore environment variables file
+.env
+
+# Ignore build artifacts
+dist/
+build/

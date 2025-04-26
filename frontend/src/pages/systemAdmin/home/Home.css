@@ -1,0 +1,112 @@
+/* Import Material Icons */
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
+.admin-home {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .admin-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .admin-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+  
+  .admin-header p {
+    font-size: 1.1rem;
+    color: #666;
+  }
+  
+  .admin-functions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .admin-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    background-color: white;
+  }
+  
+  .centered-card {
+    margin: 0 auto; /* Optional, remove if not needed */
+    max-width: 400px; /* Ensure consistent width */
+  }
+  
+  .admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+  }
+  
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #f4a405;
+    display: block;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  
+  .card-description {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .card-content {
+    padding: 1.5rem;
+  }
+  
+  .admin-button {
+    width: 100%;
+    padding: 0.75rem;
+    font-weight: 600;
+    background-color: #f4a405 ;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+  }
+  
+  .admin-button:hover {
+    background-color: #d28d02;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-functions {
+      grid-template-columns: 1fr;
+    }
+  
+    .admin-home {
+      padding: 1rem;
+    }
+  
+    .centered-card {
+      max-width: 100%; /* Allow full width on smaller screens */
+    }
+  }

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-management
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: restaurant-management
+  template:
+    metadata:
+      labels:
+        app: restaurant-management
+    spec:
+      containers:
+      - name: restaurant-management
+        image: cloud-native-food-ordering-delivery-system-restaurant-management:latest
+        ports:
+        - containerPort: 5004

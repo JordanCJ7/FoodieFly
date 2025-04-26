@@ -1,0 +1,152 @@
+/* MenuItemList.css */
+.menu-item-list-conteiner{
+  background-color: #faefdf;
+}
+.menu-container {
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.menu-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.menu-table th {
+  background-color: #f5f5f5;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-table th:hover {
+  background-color: #e8e8e8;
+}
+
+.menu-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+}
+
+.menu-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.menu-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.available {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.unavailable {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+}
+
+/* Styles for Action Icons */
+.action-icon {
+  cursor: pointer;
+  font-size: 20px;
+  margin: 0 5px;
+  transition: color 0.3s ease;
+  padding: 5px;
+  border-radius: 2px;
+}
+
+.edit-icon {
+  color: #f4a405;
+  background-color: #fff7e7;
+}
+
+.delete-icon {
+  color: #e74c3c;
+  background-color: #ffe2df;
+}
+
+.edit-icon:hover {
+  color: #dc9404;
+  background-color: #ffe8ba;
+}
+
+.delete-icon:hover {
+  color: #c0392b;
+  background-color: #fec0b9;
+}
+.sort-icon {
+  font-size: 16px;
+  vertical-align: middle; 
+  margin-left: 4px; 
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+
+  .menu-table th,
+  .menu-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .menu-image {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-table {
+    font-size: 12px;
+  }
+
+  .menu-table th,
+  .menu-table td {
+    padding: 6px 8px;
+  }
+
+  .menu-image {
+    width: 50px;
+    height: 50px;
+  }
+}

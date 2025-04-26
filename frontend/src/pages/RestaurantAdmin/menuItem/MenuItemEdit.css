@@ -1,0 +1,262 @@
+
+.menu-item-edit-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    max-width: 1200px;
+    margin: 50px auto;
+  }
+  
+  .menu-item-edit-header {
+    margin-bottom: 24px;
+  }
+  
+  .menu-item-edit-header h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0 0 8px 0;
+  }
+  
+  .menu-item-edit-header p {
+    color: #666;
+    margin: 0;
+  }
+  
+  .menu-item-form {
+    width: 100%;
+  }
+  
+  .form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  @media (min-width: 768px) {
+    .form-layout {
+      flex-direction: row;
+    }
+  
+    .form-main {
+      flex: 2;
+    }
+  
+    .form-sidebar {
+      flex: 1;
+      margin: 10px;
+    }
+  }
+  
+  .form-groupM {
+    margin-bottom: 20px;
+  }
+  
+  .label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-rowM {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  @media (min-width: 576px) {
+    .form-rowM {
+      flex-direction: row;
+    }
+  
+    .form-rowM .form-groupM {
+      flex: 1;
+    }
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus
+  {
+    border-color: #f4a405;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.1);
+  }
+  
+  .checkbox-group {
+    margin-top: 16px;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-left: 30px;
+  }
+  
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .checkbox-container:hover input ~ .checkmark {
+    background-color: #f9f9f9;
+  }
+  
+  .checkbox-container input:checked ~ .checkmark {
+    background-color: #f4a405;
+    border-color: #f4a405;
+  }
+  
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  .checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+  }
+  
+  .checkbox-container .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .image-upload-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #f9f9f9;
+  }
+  
+  .image-preview {
+    width:  100%;
+    height: 200px; 
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+  
+  .file-input-label {
+    display: block;
+    width: 95%;
+    padding: 8px;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .file-input-label:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .image-help-text {
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 8px;
+    text-align: center;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+  
+  .btn-submit {
+    padding: 12px 20px;
+    background-color: #f4a405;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .btn-submit:hover {
+    background-color: #e85a2a;
+  }
+  
+  .btn-submit:disabled {
+    background-color: #ffaa8a;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .menu-item-edit-container {
+      padding: 16px;
+    }
+  
+    .form-actions {
+      flex-direction: column;
+    }
+  
+    .btn-cancel,
+    .btn-submit {
+      width: 100%;
+    }
+  }

@@ -1,0 +1,113 @@
+.orders-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fdfdfd;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.orders-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #f4a405;
+  font-size: 2rem;
+}
+
+.order-card {
+  background: #ffffff;
+  border-left: 6px solid #f4a405;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.order-card p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.order-card strong {
+  color: #555;
+}
+
+.orders-container p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #888;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status.pending {
+  background: #ffedcc;
+  color: #c97c00;
+}
+
+.status.preparing {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.out-for-delivery {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status.delivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 0 10px;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 8px 5px;
+  border-top: 4px solid #ccc;
+  position: relative;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.step.active {
+  border-top: 4px solid #4caf50;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.step::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background-color: #ccc;
+}
+
+.step.active::before {
+  background-color: #4caf50;
+}

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-authentication
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-authentication
+  template:
+    metadata:
+      labels:
+        app: user-authentication
+    spec:
+      containers:
+      - name: user-authentication
+        image: cloud-native-food-ordering-delivery-system-user-authentication:latest
+        ports:
+        - containerPort: 5001

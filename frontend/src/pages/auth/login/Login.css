@@ -1,0 +1,166 @@
+/* Main container with background */
+.login-container {
+  display: flex;
+  flex-direction: column; 
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #fff8f3;
+}
+
+/* Welcome message styling */
+.welcome-container {
+  text-align: center;
+  margin-bottom: 30px; 
+  max-width: 450px;
+}
+
+.welcome-heading {
+  color: #f4a405;
+  font-size: 2.2rem;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.welcome-message {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Modal/card styling */
+.login-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 450px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* Header styling */
+.login-header {
+  display: flex;
+  justify-content: center; /* Center the header content */
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Form styling */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-groupL {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.labelL {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.inputL[type="text"],
+.inputL[type="password"] {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 95%;
+  background-color: white !important; 
+}
+
+.inputL[type="text"]:focus,
+.inputL[type="password"]:focus {
+  outline: none;
+  border-color: #e09400;
+  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+  
+}
+
+/* Password input container */
+.password-input-container {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+}
+
+.toggle-password svg {
+  font-size: 1.2rem;
+}
+
+/* Button styling */
+.login-button {
+  background-color: #f4a405;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%; /* Full width button */
+}
+
+.login-button:hover {
+  background-color: #e09500;
+}
+
+/* Sign up prompt */
+.signup-prompt {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.signup-prompt p {
+  font-weight: 500;
+}
+
+.signup-prompt .signup-link {
+  color: #e09400;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-prompt .signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+  .login-modal {
+    max-width: 100%;
+    border-radius: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .login-form {
+    flex: 1;
+  }
+}

@@ -1,0 +1,193 @@
+/* General container styling */
+.manage-users-container {
+  padding: 20px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Table container styling */
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.users-table tr:hover {
+  background-color: #f5f5f5;
+  transition: background-color 0.3s ease;
+}
+
+/* Account type badges */
+.account-type {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.customer {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.restaurantAdmin {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.deliveryPersonnel {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.systemAdmin {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background-color: #f4a405;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #f4a405;
+}
+
+.pagination span {
+  font-size: 0.9rem;
+  color: #333;
+}
+/* Delete button styling */
+.delete-btn {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px; 
+}
+
+.delete-btn:hover {
+  background-color: rgba(244, 67, 54, 0.25);
+  color: #d32f2f;
+  transform: scale(1.05); 
+}
+
+.delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Loading and error states */
+.loading,
+.error {
+  text-align: center;
+  font-size: 1rem;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.loading {
+  color: #666;
+  background-color: #f0f4f8;
+}
+
+.error {
+  color: #d32f2f;
+  background-color: #ffebee;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .users-table {
+    font-size: 0.85rem;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 8px 10px;
+  }
+
+  .account-type {
+    font-size: 0.8rem;
+    padding: 3px 6px;
+  }
+
+  .delete-btn {
+    padding: 4px 8px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 6px 8px;
+  }
+
+  .delete-btn {
+    padding: 3px 6px;
+    font-size: 0.8rem;
+  }
+}

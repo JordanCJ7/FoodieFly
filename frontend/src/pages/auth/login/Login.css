@@ -5,7 +5,23 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: var(--background-light);
+  background: linear-gradient(135deg, var(--background-light) 0%, #f0f7f0 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+  animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Welcome message styling */
@@ -13,30 +29,58 @@
   text-align: center;
   margin-bottom: 30px; 
   max-width: 450px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .welcome-heading {
   color: var(--primary-color);
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   margin: 0 0 10px 0;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .welcome-message {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   margin: 0;
+  opacity: 0.9;
 }
 
 /* Modal/card styling */
 .login-modal {
-  background-color: var(--background-white);
+  background-color: rgba(255, 255, 255, 0.95);
   border-radius: var(--border-radius-lg);
   width: 100%;
   max-width: 450px;
-  padding: 24px;
-  box-shadow: var(--shadow-lg);
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   position: relative;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.8s ease-out;
+  border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Header styling */
@@ -75,20 +119,21 @@
 
 .inputL[type="text"],
 .inputL[type="password"] {
-  padding: 12px;
-  border: 1px solid var(--border-color);
+  padding: 14px;
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius-md);
-  font-size: 0.9rem;
+  font-size: 1rem;
   width: 95%;
   background-color: var(--background-white) !important;
-  transition: all var(--transition-speed) ease;
+  transition: all 0.3s ease;
 }
 
 .inputL[type="text"]:focus,
 .inputL[type="password"]:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+  transform: translateY(-1px);
 }
 
 /* Password input container */
@@ -118,29 +163,52 @@
 
 /* Button styling */
 .login-button {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
   color: white;
   border: none;
   border-radius: var(--border-radius-md);
-  padding: 12px;
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-speed) ease;
+  transition: all 0.3s ease;
   width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 .login-button:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.login-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+
+.login-button:hover::after {
+  transform: translateY(0);
 }
 
 /* Sign up prompt */
 .signup-prompt {
-  margin-top: 24px;
+  margin-top: 28px;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .signup-prompt p {
@@ -151,13 +219,27 @@
 .signup-prompt .signup-link {
   color: var(--primary-color);
   text-decoration: none;
-  font-weight: 500;
-  transition: color var(--transition-speed) ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
-.signup-prompt .signup-link:hover {
-  color: var(--primary-dark);
-  text-decoration: underline;
+.signup-prompt .signup-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.signup-prompt .signup-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 /* Error message styling */

@@ -331,6 +331,7 @@ function SignUp() {
           </ul>
 
         </div>
+        
         <img src={SignUpImage} alt="signup" />
       </div>
     </div>

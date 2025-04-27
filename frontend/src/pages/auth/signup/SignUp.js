@@ -322,13 +322,14 @@ function SignUp() {
       </div>
       <div className="signup-image">
         <div className="benefits">
-          <h2>Join Our Food Delivery Network</h2>
+        <h2>Get Food Delivered Your Way</h2>
           <ul>
-            <li>Order from your favorite local restaurants</li>
-            <li>Fast and reliable delivery to your doorstep</li>
-            <li>Exclusive deals and discounts</li>
-            <li>Easy tracking of your orders</li>
+            <li>Discover top local eats, all in one place</li>
+            <li>Lightning-fast, dependable delivery right to your door</li>
+            <li>Unlock exclusive deals, promos, and savings</li>
+            <li>Track your order in real-time, every step of the way</li>
           </ul>
+
         </div>
         <img src={SignUpImage} alt="signup" />
       </div>

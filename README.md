@@ -197,4 +197,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support, 
 - email janithasuranjana2001@gmail.com 
 - Call +94743288572 / +94725253444
-or create an issue in the repository.
+- or create an issue in the repository.

@@ -18,13 +18,16 @@ function Home() {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5004/api/menu-items/home-menu-items?page=${page}&limit=6${search ? `&search=${search}` : ''}`
+        `http://localhost:5004/api/menu-items/home-menu-items?page=${page}&limit=6${search ? `&search=${encodeURIComponent(search)}` : ''}`
       );
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
       }
+      
       const data = await response.json();
+      console.log("Search results:", data); // For debugging
 
       if (!Array.isArray(data.data)) {
         throw new Error("Invalid data format received from the server.");
@@ -46,17 +49,20 @@ function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const searchInput = e.target.querySelector('.search-input-h').value;
+    const searchInput = e.target.querySelector('.search-input-h').value.trim();
     setSearchQuery(searchInput);
     setCurrentPage(1); // Reset to first page when searching
-    setIsSearching(true);
+    setIsSearching(!!searchInput);
+    fetchMenuItems(1, searchInput);
   };
 
   const handleSearchInputChange = (e) => {
-    if (e.target.value === '') {
+    const value = e.target.value.trim();
+    if (value === '') {
       setSearchQuery('');
       setIsSearching(false);
       setCurrentPage(1);
+      fetchMenuItems(1, '');
     }
   };
 

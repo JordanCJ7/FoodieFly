@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './FoodDetail.css';
 
 function FoodDetail() {
@@ -40,8 +41,20 @@ function FoodDetail() {
   const handleAddToCart = async () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      alert('Please log in to add items to cart');
-      navigate('/login');
+      Swal.fire({
+        title: 'Authentication Required',
+        text: 'Please log in to add items to cart',
+        icon: 'warning',
+        confirmButtonText: 'Go to Login',
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonColor: '#e74c3c'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login');
+        }
+      });
       return;
     }
 
@@ -66,21 +79,44 @@ function FoodDetail() {
       }
 
       const data = await response.json();
-      alert('Item added to cart successfully!');
+      Swal.fire({
+        title: 'Success!',
+        text: 'Item added to cart successfully!',
+        icon: 'success',
+        confirmButtonColor: '#2ecc71',
+        timer: 2000,
+        timerProgressBar: true
+      });
     } catch (err) {
       console.error('Error adding to cart:', err);
-      alert(err.message || 'Failed to add item to cart. Please try again.');
+      Swal.fire({
+        title: 'Error!',
+        text: err.message || 'Failed to add item to cart. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#e74c3c'
+      });
     }
   };
 
   const handleOrderNow = () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      alert('Please log in to place an order');
-      navigate('/login');
+      Swal.fire({
+        title: 'Authentication Required',
+        text: 'Please log in to place an order',
+        icon: 'warning',
+        confirmButtonText: 'Go to Login',
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonColor: '#e74c3c'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login');
+        }
+      });
       return;
     }
-    // Navigate to cart page
     navigate('/cart');
   };
 

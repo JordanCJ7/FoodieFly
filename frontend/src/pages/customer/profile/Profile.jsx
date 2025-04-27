@@ -142,8 +142,8 @@ const Profile = () => {
         return;
       }
 
-      if (passwordData.newPassword.length < 6) {
-        showErrorAlert('New password must be at least 6 characters long');
+      if (passwordData.newPassword.length < 5) {
+        showErrorAlert('New password must be at least 5 characters long');
         return;
       }
 

@@ -182,7 +182,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- Janitha Gamage - Initial work - [YourGitHub](https://github.com/yourusername)
+- Janitha Gamage - Initial work - [CJ7](https://github.com/JordanCJ7)
 
 ## 🙏 Acknowledgments
 

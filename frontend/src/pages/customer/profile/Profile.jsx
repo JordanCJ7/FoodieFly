@@ -10,19 +10,30 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Swal from 'sweetalert2';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: '',
     mobile_number: '',
     city: ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
   const navigate = useNavigate();
 
@@ -88,6 +99,14 @@ const Profile = () => {
     }));
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleUpdateProfile = async () => {
     try {
       const token = localStorage.getItem('auth_token');
@@ -111,6 +130,52 @@ const Profile = () => {
       showSuccessAlert('Profile updated successfully!');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update profile';
+      showErrorAlert(errorMessage);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    try {
+      // Validate passwords
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        showErrorAlert('New passwords do not match');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 6) {
+        showErrorAlert('New password must be at least 6 characters long');
+        return;
+      }
+
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        showErrorAlert('Authentication token is missing. Please log in again.');
+        return;
+      }
+
+      await axios.put(
+        'http://localhost:5001/api/auth/password',
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Clear password form
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordForm(false);
+      showSuccessAlert('Password updated successfully!');
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to update password';
       showErrorAlert(errorMessage);
     }
   };
@@ -206,6 +271,33 @@ const Profile = () => {
     );
   };
 
+  const renderPasswordField = (label, name, showPassword, setShowPassword) => (
+    <div className="profile-field">
+      <div className="field-icon">
+        <LockIcon />
+      </div>
+      <div className="field-content">
+        <label>{label}</label>
+        <div className="password-input-container">
+          <input
+            type={showPassword ? "text" : "password"}
+            name={name}
+            value={passwordData[name]}
+            onChange={handlePasswordChange}
+            className="profile-input"
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="profile-container">
       <div className="profile-header">
@@ -253,6 +345,46 @@ const Profile = () => {
             {renderProfileField(<EmailIcon />, "Email Address", user.email, 'email')}
             {renderProfileField(<PhoneIcon />, "Phone Number", user.mobile_number, 'mobile_number')}
             {renderProfileField(<LocationCityIcon />, "City", user.city, 'city')}
+          </div>
+
+          <div className="profile-info-section">
+            <div className="section-header">
+              <h2>Password Management</h2>
+              <button
+                className="change-password-button"
+                onClick={() => setShowPasswordForm(!showPasswordForm)}
+              >
+                {showPasswordForm ? 'Cancel' : 'Change Password'}
+              </button>
+            </div>
+            {showPasswordForm && (
+              <div className="password-form">
+                {renderPasswordField(
+                  "Current Password",
+                  "currentPassword",
+                  showCurrentPassword,
+                  setShowCurrentPassword
+                )}
+                {renderPasswordField(
+                  "New Password",
+                  "newPassword",
+                  showNewPassword,
+                  setShowNewPassword
+                )}
+                {renderPasswordField(
+                  "Confirm New Password",
+                  "confirmPassword",
+                  showConfirmPassword,
+                  setShowConfirmPassword
+                )}
+                <button
+                  className="update-password-button"
+                  onClick={handleUpdatePassword}
+                >
+                  Update Password
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

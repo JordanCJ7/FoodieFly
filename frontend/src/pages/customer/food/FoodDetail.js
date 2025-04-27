@@ -53,7 +53,7 @@ function FoodDetail() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          itemId: foodItem.id,
+          itemId: foodItem._id || foodItem.id,
           name: foodItem.name,
           price: foodItem.price,
           img: foodItem.image
@@ -61,14 +61,15 @@ function FoodDetail() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add to cart');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add to cart');
       }
 
       const data = await response.json();
       alert('Item added to cart successfully!');
     } catch (err) {
       console.error('Error adding to cart:', err);
-      alert('Failed to add item to cart. Please try again.');
+      alert(err.message || 'Failed to add item to cart. Please try again.');
     }
   };
 

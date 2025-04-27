@@ -85,14 +85,6 @@ const Profile = () => {
             {renderProfileField(<PhoneIcon />, "Phone Number", user.mobile_number)}
             {renderProfileField(<LocationCityIcon />, "City", user.city)}
           </div>
-          
-          <div className="profile-section">
-            <h2>Address</h2>
-            <p><strong>Street:</strong> {user.address?.street}</p>
-            <p><strong>City:</strong> {user.address?.city}</p>
-            <p><strong>State:</strong> {user.address?.state}</p>
-            <p><strong>Zip Code:</strong> {user.address?.zipCode}</p>
-          </div>
         </div>
       )}
     </div>

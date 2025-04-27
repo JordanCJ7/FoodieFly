@@ -13,6 +13,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import SecurityIcon from '@mui/icons-material/Security';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import Swal from 'sweetalert2';
 
 const Profile = () => {
@@ -23,6 +25,7 @@ const Profile = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState('personal');
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -78,7 +81,10 @@ const Profile = () => {
       confirmButtonColor: '#4CAF50',
       timer: 2000,
       timerProgressBar: true,
-      showConfirmButton: false
+      showConfirmButton: false,
+      customClass: {
+        popup: 'animated-alert'
+      }
     });
   };
 
@@ -87,7 +93,10 @@ const Profile = () => {
       title: 'Error!',
       text: message,
       icon: 'error',
-      confirmButtonColor: '#f44336'
+      confirmButtonColor: '#f44336',
+      customClass: {
+        popup: 'animated-alert'
+      }
     });
   };
 
@@ -207,7 +216,10 @@ const Profile = () => {
         cancelButtonColor: '#4CAF50',
         confirmButtonText: 'Yes, delete my profile',
         cancelButtonText: 'Cancel',
-        reverseButtons: true
+        reverseButtons: true,
+        customClass: {
+          popup: 'animated-alert'
+        }
       });
 
       if (result.isConfirmed) {
@@ -233,7 +245,10 @@ const Profile = () => {
           confirmButtonColor: '#4CAF50',
           timer: 2000,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
+          customClass: {
+            popup: 'animated-alert'
+          }
         });
 
         navigate('/login');
@@ -309,7 +324,10 @@ const Profile = () => {
         <div className="profile-avatar">
           {user?.first_name?.charAt(0)?.toUpperCase() || 'U'}
         </div>
-        <h1>My Profile</h1>
+        <div className="profile-header-content">
+          <h1>My Profile</h1>
+          <p className="profile-subtitle">Manage your account settings and preferences</p>
+        </div>
         <div className="profile-actions">
           {!isEditing ? (
             <button className="edit-button" onClick={() => setIsEditing(true)}>
@@ -331,68 +349,104 @@ const Profile = () => {
         </div>
       </div>
 
-      {user && (
-        <div className="profile-details">
-          <div className="profile-info-section">
-            <h2>Personal Information</h2>
-            {renderProfileField(
-              <PersonIcon />,
-              "First Name",
-              user.first_name,
-              'first_name'
-            )}
-            {renderProfileField(
-              <PersonIcon />,
-              "Last Name",
-              user.last_name,
-              'last_name'
-            )}
-            {renderProfileField(<EmailIcon />, "Email Address", user.email, 'email')}
-            {renderProfileField(<PhoneIcon />, "Phone Number", user.mobile_number, 'mobile_number')}
-            {renderProfileField(<LocationCityIcon />, "City", user.city, 'city')}
-          </div>
+      <div className="profile-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'personal' ? 'active' : ''}`}
+          onClick={() => setActiveTab('personal')}
+        >
+          <PersonIcon /> Personal Info
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'security' ? 'active' : ''}`}
+          onClick={() => setActiveTab('security')}
+        >
+          <SecurityIcon /> Security
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'notifications' ? 'active' : ''}`}
+          onClick={() => setActiveTab('notifications')}
+        >
+          <NotificationsIcon /> Notifications
+        </button>
+      </div>
 
-          <div className="profile-info-section">
-            <div className="section-header">
-              <h2>Password Management</h2>
-              <button
-                className="change-password-button"
-                onClick={() => setShowPasswordForm(!showPasswordForm)}
-              >
-                {showPasswordForm ? 'Cancel' : 'Change Password'}
-              </button>
+      <div className="profile-content">
+        {activeTab === 'personal' && (
+          <div className="profile-details">
+            <div className="profile-info-section">
+              <h2>Personal Information</h2>
+              {renderProfileField(
+                <PersonIcon />,
+                "First Name",
+                user.first_name,
+                'first_name'
+              )}
+              {renderProfileField(
+                <PersonIcon />,
+                "Last Name",
+                user.last_name,
+                'last_name'
+              )}
+              {renderProfileField(<EmailIcon />, "Email Address", user.email, 'email')}
+              {renderProfileField(<PhoneIcon />, "Phone Number", user.mobile_number, 'mobile_number')}
+              {renderProfileField(<LocationCityIcon />, "City", user.city, 'city')}
             </div>
-            {showPasswordForm && (
-              <div className="password-form">
-                {renderPasswordField(
-                  "Current Password",
-                  "currentPassword",
-                  showCurrentPassword,
-                  setShowCurrentPassword
-                )}
-                {renderPasswordField(
-                  "New Password",
-                  "newPassword",
-                  showNewPassword,
-                  setShowNewPassword
-                )}
-                {renderPasswordField(
-                  "Confirm New Password",
-                  "confirmPassword",
-                  showConfirmPassword,
-                  setShowConfirmPassword
-                )}
+          </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="profile-details">
+            <div className="profile-info-section">
+              <div className="section-header">
+                <h2>Password Management</h2>
                 <button
-                  className="update-password-button"
-                  onClick={handleUpdatePassword}
+                  className="change-password-button"
+                  onClick={() => setShowPasswordForm(!showPasswordForm)}
                 >
-                  Update Password
+                  {showPasswordForm ? 'Cancel' : 'Change Password'}
                 </button>
               </div>
-            )}
+              {showPasswordForm && (
+                <div className="password-form">
+                  {renderPasswordField(
+                    "Current Password",
+                    "currentPassword",
+                    showCurrentPassword,
+                    setShowCurrentPassword
+                  )}
+                  {renderPasswordField(
+                    "New Password",
+                    "newPassword",
+                    showNewPassword,
+                    setShowNewPassword
+                  )}
+                  {renderPasswordField(
+                    "Confirm New Password",
+                    "confirmPassword",
+                    showConfirmPassword,
+                    setShowConfirmPassword
+                  )}
+                  <button
+                    className="update-password-button"
+                    onClick={handleUpdatePassword}
+                  >
+                    Update Password
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {activeTab === 'notifications' && (
+          <div className="profile-details">
+            <div className="profile-info-section">
+              <h2>Notification Settings</h2>
+              <p className="coming-soon">Notification preferences coming soon!</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -146,3 +146,34 @@ exports.logout = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Update User Profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { first_name, last_name, mobile_number, email, city } = req.body;
+    const userId = req.user.id;
+
+    // Check if email is being changed and if it's already in use
+    if (email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email is already in use' });
+      }
+    }
+
+    // Update user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { first_name, last_name, mobile_number, email, city },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

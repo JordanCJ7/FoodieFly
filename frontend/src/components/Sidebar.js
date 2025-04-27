@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./Sidebar.css";
 import { Link, useNavigate } from "react-router-dom";
 import ListAltIcon from "@mui/icons-material/ListAlt";
@@ -12,10 +12,14 @@ import PeopleIcon from "@mui/icons-material/People";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"; 
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isHovered, setIsHovered] = useState(null);
 
   // Check if the user is logged in by verifying the presence of the auth token
   const isLoggedIn = !!localStorage.getItem("auth_token");
@@ -25,10 +29,10 @@ function Sidebar({ isOpen, onClose }) {
     try {
       const token = localStorage.getItem("auth_token");
       if (token) {
-        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode the payload
-        return decodedToken.role || "customer"; // Default to "customer" if role is missing
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        return decodedToken.role || "customer";
       }
-      return "customer"; // Default role for non-logged-in users
+      return "customer";
     } catch (err) {
       console.error("Error decoding token:", err);
       return "customer";
@@ -40,18 +44,21 @@ function Sidebar({ isOpen, onClose }) {
   // Function to handle sign-out
   const handleSignOut = async () => {
     try {
-      // Send a POST request to the backend to log out
       await fetch("http://localhost:5001/api/auth/logout", {
         method: "POST",
-        credentials: "include", // Include cookies
+        credentials: "include",
       });
-      // Clear any frontend-stored tokens
       localStorage.removeItem("auth_token");
-      // Redirect the user to the login page
       navigate("/login");
     } catch (err) {
       console.error("Error during sign-out:", err);
     }
+  };
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.body.classList.toggle('dark-mode');
   };
 
   // Prevent scrolling when sidebar is open
@@ -80,22 +87,31 @@ function Sidebar({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="sidebar-wrapper">
+    <div className={`sidebar-wrapper ${isDarkMode ? 'dark-mode' : ''}`}>
       <div className="sidebar-overlay"></div>
-      {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-title">FoodSprint</div>
-          <button className="sidebar-close-button" onClick={onClose}>
-            <CloseIcon />
-          </button>
+          <div className="sidebar-controls">
+            <button className="theme-toggle" onClick={toggleDarkMode}>
+              {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+            </button>
+            <button className="sidebar-close-button" onClick={onClose}>
+              <CloseIcon />
+            </button>
+          </div>
         </div>
         <div className="sidebar-content">
-          {/* Profile section */}
           {isLoggedIn && (
             <div className="profile-section">
               <div className="profile-info">
-                <Link to="/profile" className="sidebar-link" onClick={onClose}>
+                <Link 
+                  to="/profile" 
+                  className="sidebar-link" 
+                  onClick={onClose}
+                  onMouseEnter={() => setIsHovered('profile')}
+                  onMouseLeave={() => setIsHovered(null)}
+                >
                   <AccountCircleIcon /> 
                   <span>Manage account</span>
                 </Link>
@@ -103,17 +119,27 @@ function Sidebar({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* Navigation */}
           {isLoggedIn && (
             <nav className="sidebar-nav">
-              {/* Customer-specific links */}
               {userRole === "customer" && (
                 <>
-                  <Link to="/orders" className="sidebar-link" onClick={onClose}>
+                  <Link 
+                    to="/orders" 
+                    className="sidebar-link" 
+                    onClick={onClose}
+                    onMouseEnter={() => setIsHovered('orders')}
+                    onMouseLeave={() => setIsHovered(null)}
+                  >
                     <ListAltIcon />
                     <span>Orders</span>
                   </Link>
-                  <Link to="/cart" className="sidebar-link" onClick={onClose}>
+                  <Link 
+                    to="/cart" 
+                    className="sidebar-link" 
+                    onClick={onClose}
+                    onMouseEnter={() => setIsHovered('cart')}
+                    onMouseLeave={() => setIsHovered(null)}
+                  >
                     <ShoppingCartIcon />
                     <span>Cart</span>
                   </Link>
@@ -121,6 +147,8 @@ function Sidebar({ isOpen, onClose }) {
                     to="/notifications"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('notifications')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <NotificationsIcon />
                     <span>Notifications</span>
@@ -128,13 +156,14 @@ function Sidebar({ isOpen, onClose }) {
                 </>
               )}
 
-              {/* Restaurant Admin-specific links */}
               {userRole === "restaurantAdmin" && (
                 <>
                   <Link
                     to="/addMenuItem"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('addMenu')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <AddBoxIcon />
                     <span>Add Menus</span>
@@ -143,6 +172,8 @@ function Sidebar({ isOpen, onClose }) {
                     to="/menu-item-list"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('viewMenu')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <RestaurantMenuIcon />
                     <span>View Menus</span>
@@ -150,21 +181,27 @@ function Sidebar({ isOpen, onClose }) {
                 </>
               )}
 
-              {/* Delivery Personnel-specific links */}
               {userRole === "deliveryPersonnel" && (
-                <Link to="/delivery" className="sidebar-link" onClick={onClose}>
+                <Link 
+                  to="/delivery" 
+                  className="sidebar-link" 
+                  onClick={onClose}
+                  onMouseEnter={() => setIsHovered('delivery')}
+                  onMouseLeave={() => setIsHovered(null)}
+                >
                   <LocalShippingIcon />
                   <span>My Deliveries</span>
                 </Link>
               )}
 
-              {/* System Admin-specific links */}
               {userRole === "systemAdmin" && (
                 <>
                   <Link
                     to="/manage-users"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('users')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <PeopleIcon />
                     <span>Manage Users</span>
@@ -173,6 +210,8 @@ function Sidebar({ isOpen, onClose }) {
                     to="/verifyRestaurant"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('restaurants')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <StorefrontIcon />
                     <span>Manage Restaurants</span>
@@ -181,6 +220,8 @@ function Sidebar({ isOpen, onClose }) {
                     to="/manage-financials"
                     className="sidebar-link"
                     onClick={onClose}
+                    onMouseEnter={() => setIsHovered('financials')}
+                    onMouseLeave={() => setIsHovered(null)}
                   >
                     <AccountBalanceIcon />
                     <span>Manage Financials</span>
@@ -190,7 +231,6 @@ function Sidebar({ isOpen, onClose }) {
             </nav>
           )}
 
-          {/* Authentication Buttons */}
           {!isLoggedIn && (
             <div className="auth-buttons">
               <Link to="/register">
@@ -206,11 +246,15 @@ function Sidebar({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* Sign out */}
           {isLoggedIn && (
             <div className="sidebar-section">
               <div className="divider"></div>
-              <button className="sidebar-button" onClick={handleSignOut}>
+              <button 
+                className="sidebar-button" 
+                onClick={handleSignOut}
+                onMouseEnter={() => setIsHovered('signout')}
+                onMouseLeave={() => setIsHovered(null)}
+              >
                 <ExitToAppIcon />
                 <span>Sign Out</span>
               </button>

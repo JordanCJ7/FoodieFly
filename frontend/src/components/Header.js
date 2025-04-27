@@ -130,7 +130,7 @@ function Header() {
               <MenuIcon />
             </button>
             <Link to={homeRoute} className="logo-container">
-              <div className="logo">FoodSprint</div>
+              <div className="logo">FoodieFly</div>
             </Link>
           </div>
 

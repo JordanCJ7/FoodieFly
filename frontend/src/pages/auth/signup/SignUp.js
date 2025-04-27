@@ -330,9 +330,10 @@ function SignUp() {
             <li>Track your order in real-time, every step of the way</li>
           </ul>
 
+        <img src={SignUpImage} alt="signup" />
         </div>
         
-        <img src={SignUpImage} alt="signup" />
+        
       </div>
     </div>
   );

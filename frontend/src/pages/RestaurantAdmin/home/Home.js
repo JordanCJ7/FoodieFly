@@ -78,7 +78,7 @@ function Home() {
   return (
     <div className="home-container-RA">
       <div className="hero-section-RA">
-        <h1>Food Ordering & Delivery System</h1>
+        <h1>FoodieFly - Food Ordering & Delivery System</h1>
         <p className="subtitle-RA">
           Register your restaurant, manage your menu, and start receiving orders online today.
         </p>

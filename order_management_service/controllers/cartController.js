@@ -21,19 +21,28 @@ exports.addToCart = async (req, res) => {
       cart = new Cart({ userId, items: [] });
     }
 
-    const existingItem = cart.items.find(item => item.itemId.toString() === itemId);
+    // Convert itemId to string without using toString() method
+    const existingItem = cart.items.find(item => 
+      String(item.itemId) === String(itemId)
+    );
 
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      cart.items.push({ itemId, name, price, img, quantity: 1 });
+      cart.items.push({ 
+        itemId: itemId,
+        name, 
+        price, 
+        img, 
+        quantity: 1 
+      });
     }
 
     await cart.save();
     res.status(200).json(cart);
   } catch (err) {
     console.error("Error adding to cart:", err);
-    res.status(500).json({ error: "Failed to add to cart" });
+    res.status(500).json({ error: "Failed to add to cart: " + err.message });
   }
 };
 

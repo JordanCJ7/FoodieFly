@@ -147,6 +147,11 @@ const Profile = () => {
         return;
       }
 
+      if (passwordData.newPassword === passwordData.currentPassword) {
+        showErrorAlert('New password cannot be the same as your current password');
+        return;
+      }
+
       const token = localStorage.getItem('auth_token');
       if (!token) {
         showErrorAlert('Authentication token is missing. Please log in again.');

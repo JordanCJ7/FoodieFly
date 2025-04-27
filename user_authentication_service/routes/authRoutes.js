@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login,getAllUsers, deleteUser,logout} = require('../controllers/authController');
+const { register, login, getAllUsers, deleteUser, logout, getProfile } = require('../controllers/authController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -9,6 +9,7 @@ router.post('/register', register);
 router.post('/login', login);
 
 // Protected routes
+router.get('/profile', verifyToken, getProfile); // Get user profile
 router.get('/all', verifyToken, verifyRole(['systemAdmin']), getAllUsers); // Get all users (only system admin)
 router.delete('/delete/:id', verifyToken, verifyRole(['systemAdmin']), deleteUser); // Delete user (only system admin)
 

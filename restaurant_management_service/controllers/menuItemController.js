@@ -229,32 +229,42 @@ exports.getHomeMenuItems = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6;
     const search = req.query.search || '';
-
     const skip = (page - 1) * limit;
 
     let query = {};
     
-    // Add search functionality
     if (search) {
       query = {
         $or: [
           { name: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { restaurant: { $regex: search, $options: 'i' } }
+          { description: { $regex: search, $options: 'i' } }
         ]
       };
     }
 
+    // Get total count for pagination
     const total = await MenuItem.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
+    // Fetch menu items with restaurant names
     const menuItems = await MenuItem.find(query)
+      .populate('restaurantId', 'restaurantName')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
+    // Format the response
+    const formattedMenuItems = menuItems.map(item => ({
+      id: item._id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      image: item.image,
+      restaurant: item.restaurantId ? item.restaurantId.restaurantName : "Unknown Restaurant"
+    }));
+
     res.json({
-      data: menuItems,
+      data: formattedMenuItems,
       currentPage: page,
       totalPages,
       totalItems: total

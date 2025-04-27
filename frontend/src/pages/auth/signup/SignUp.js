@@ -116,8 +116,8 @@ function SignUp() {
         }
         break;
       case 'Password':
-        if (value.length < 8) {
-          error = 'Password must be at least 8 characters long';
+        if (value.length < 5) {
+          error = 'Password must be at least 5 characters long';
         }
         break;
       default:

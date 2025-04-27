@@ -283,7 +283,7 @@ function SignUp() {
                   onChange={handleChange}
                 />
                 <label htmlFor="business" className="account-type-label">
-                  <span className="account-type-title">Business</span>
+                  <span className="account-type-title">Business Owner</span>
                   <span className="account-type-info">
                     Register your restaurant on our platform
                   </span>

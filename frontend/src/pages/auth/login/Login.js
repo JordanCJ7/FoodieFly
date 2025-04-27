@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"; 
 import "./Login.css";
+import Swal from 'sweetalert2';
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
@@ -11,7 +12,6 @@ function Login() {
     email: "",
     password: "",
   });
-  const [error, setError] = useState(""); // To display error messages
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -25,14 +25,37 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
+      // Show loading state
+      Swal.fire({
+        title: 'Logging in...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       // Send login data to backend
       const response = await axios.post("http://localhost:5001/api/auth/login", formData);
-
       const { role, token } = response.data;
 
-      // Store the token in localStorage or cookies 
+      // Store the token in localStorage
       localStorage.setItem("auth_token", token);
+
+      // Show success message
+      await Swal.fire({
+        icon: 'success',
+        title: 'Welcome back!',
+        text: 'Login successful',
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#fff',
+        customClass: {
+          title: 'success-title',
+          popup: 'success-popup'
+        }
+      });
 
       // Navigate based on user role
       if (role === "customer") {
@@ -46,56 +69,58 @@ function Login() {
       }
     } catch (err) {
       console.error("Error during login:", err.response?.data?.error);
-      setError(err.response?.data?.error || "An unexpected error occurred.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: err.response?.data?.error || "An unexpected error occurred.",
+        confirmButtonColor: 'var(--primary-color)',
+        background: '#fff',
+        customClass: {
+          title: 'error-title',
+          popup: 'error-popup'
+        }
+      });
     }
   };
 
   return (
     <div className="login-container">
       <div className="welcome-container">
-        <h1 className="welcome-heading">Welcome Back!</h1>
-        <p className="welcome-message">
-          Please enter your details to access your account
-        </p>
+        <h1 className="welcome-heading">Welcome to FoodieFly</h1>
+        <p className="welcome-message">Sign in to continue to your account</p>
       </div>
-
+      
       <div className="login-modal">
         <div className="login-header">
           <h2>Login</h2>
         </div>
-
+        
         <form className="login-form" onSubmit={handleSubmit}>
-          {error && <p className="error-message">{error}</p>}
-
           <div className="form-groupL">
-            <label className="labelL" htmlFor="email">
-              Email or phone number
-            </label>
+            <label className="labelL" htmlFor="email">Email</label>
             <input
               className="inputL"
               type="text"
               id="email"
               name="email"
-              placeholder="Enter your email or phone"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Enter your email"
               required
             />
           </div>
 
-          <div className="form-group password-group">
-            <label className="labelL" htmlFor="password">
-              Password
-            </label>
+          <div className="form-groupL">
+            <label className="labelL" htmlFor="password">Password</label>
             <div className="password-input-container">
               <input
                 className="inputL"
                 type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
-                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="Enter your password"
                 required
               />
               <button

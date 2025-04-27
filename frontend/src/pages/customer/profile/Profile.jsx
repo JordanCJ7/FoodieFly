@@ -24,7 +24,6 @@ const Profile = () => {
     mobile_number: '',
     city: ''
   });
-  const [updateMessage, setUpdateMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,13 +51,34 @@ const Profile = () => {
         });
         setLoading(false);
       } catch (err) {
-        setError('Failed to load profile information');
+        showErrorAlert('Failed to load profile information');
         setLoading(false);
       }
     };
 
     fetchUserProfile();
   }, [navigate]);
+
+  const showSuccessAlert = (message) => {
+    Swal.fire({
+      title: 'Success!',
+      text: message,
+      icon: 'success',
+      confirmButtonColor: '#4CAF50',
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
+  };
+
+  const showErrorAlert = (message) => {
+    Swal.fire({
+      title: 'Error!',
+      text: message,
+      icon: 'error',
+      confirmButtonColor: '#f44336'
+    });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -72,7 +92,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        setError('Authentication token is missing. Please log in again.');
+        showErrorAlert('Authentication token is missing. Please log in again.');
         return;
       }
 
@@ -88,12 +108,10 @@ const Profile = () => {
 
       setUser(response.data);
       setIsEditing(false);
-      setUpdateMessage('Profile updated successfully!');
-      setTimeout(() => setUpdateMessage(''), 3000);
+      showSuccessAlert('Profile updated successfully!');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update profile';
-      setError(errorMessage);
-      setTimeout(() => setError(null), 3000);
+      showErrorAlert(errorMessage);
     }
   };
 
@@ -111,20 +129,21 @@ const Profile = () => {
   const handleDeleteProfile = async () => {
     try {
       const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "This action cannot be undone!",
+        title: 'Delete Profile',
+        text: "Are you sure you want to delete your profile? This action cannot be undone!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        confirmButtonColor: '#f44336',
+        cancelButtonColor: '#4CAF50',
         confirmButtonText: 'Yes, delete my profile',
-        cancelButtonText: 'Cancel'
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
       });
 
       if (result.isConfirmed) {
         const token = localStorage.getItem('auth_token');
         if (!token) {
-          setError('Authentication token is missing. Please log in again.');
+          showErrorAlert('Authentication token is missing. Please log in again.');
           return;
         }
 
@@ -136,26 +155,32 @@ const Profile = () => {
 
         // Clear local storage and redirect to login
         localStorage.removeItem('auth_token');
-        navigate('/login');
+        
+        await Swal.fire({
+          title: 'Profile Deleted!',
+          text: 'Your profile has been successfully deleted.',
+          icon: 'success',
+          confirmButtonColor: '#4CAF50',
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
 
-        Swal.fire(
-          'Deleted!',
-          'Your profile has been deleted.',
-          'success'
-        );
+        navigate('/login');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to delete profile';
-      setError(errorMessage);
-      setTimeout(() => setError(null), 3000);
+      showErrorAlert(errorMessage);
     }
   };
 
   if (loading) {
-    return <div className="profile-loading">
-      <div className="loading-spinner"></div>
-      Loading profile...
-    </div>;
+    return (
+      <div className="profile-loading">
+        <div className="loading-spinner"></div>
+        Loading profile...
+      </div>
+    );
   }
 
   const renderProfileField = (icon, label, value, fieldName) => {
@@ -208,9 +233,6 @@ const Profile = () => {
           </button>
         </div>
       </div>
-
-      {updateMessage && <div className="success-message">{updateMessage}</div>}
-      {error && <div className="profile-error">{error}</div>}
 
       {user && (
         <div className="profile-details">

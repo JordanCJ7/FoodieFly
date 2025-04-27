@@ -299,7 +299,7 @@ function SignUp() {
                   onChange={handleChange}
                 />
                 <label htmlFor="delivery" className="account-type-label">
-                  <span className="account-type-title">Delivery</span>
+                  <span className="account-type-title">Delivery Person</span>
                   <span className="account-type-info">
                     Join our delivery fleet and earn money
                   </span>

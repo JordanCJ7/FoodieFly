@@ -23,7 +23,6 @@ const sriLankanCities = [
   "Battaramulla", "Dalugama", "Kotikawatta", "Keselwatta", "Valvettithurai"
 ];
 
-
 function SignUp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

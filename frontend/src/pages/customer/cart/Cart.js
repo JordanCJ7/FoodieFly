@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Cart.css";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Swal from 'sweetalert2';
 
 function Cart() {
     const [cartItems, setCartItems] = useState([]);
@@ -58,32 +59,45 @@ function Cart() {
 
     const removeItem = async (id) => {
         const token = localStorage.getItem("auth_token");
-        console.log("Attempting to remove item with ID:", id);
-
+        
         try {
-            const response = await axios.delete(`http://localhost:5003/api/cart/remove/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to remove this item from cart?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2ecc71',
+                cancelButtonColor: '#e74c3c',
+                confirmButtonText: 'Yes, remove it!'
             });
 
-            console.log("Remove item response:", response.data);
+            if (result.isConfirmed) {
+                const response = await axios.delete(`http://localhost:5003/api/cart/remove/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-            // Update local state after successful deletion
-            setCartItems((prev) => {
-                const updated = prev.filter((item) => item._id !== id);
-                console.log("Updated cartItems after delete:", updated);
-                return updated;
-            });
+                setCartItems((prev) => prev.filter((item) => item._id !== id));
+                setSelectedOrders((prev) => prev.filter((orderId) => orderId !== id));
 
-            setSelectedOrders((prev) => {
-                const updated = prev.filter((orderId) => orderId !== id);
-                console.log("Updated selectedOrders after delete:", updated);
-                return updated;
-            });
+                Swal.fire({
+                    title: 'Removed!',
+                    text: 'Item has been removed from cart.',
+                    icon: 'success',
+                    confirmButtonColor: '#2ecc71',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
         } catch (error) {
             console.error("Error removing item:", error.response?.data || error.message);
-            alert("Failed to remove item from cart.");
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to remove item from cart.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
         }
     };
 
@@ -93,7 +107,12 @@ function Cart() {
         const newQuantity = item.quantity + change;
 
         if (newQuantity <= 0) {
-            alert("Quantity cannot be less than 1");
+            Swal.fire({
+                title: 'Invalid Quantity',
+                text: 'Quantity cannot be less than 1',
+                icon: 'warning',
+                confirmButtonColor: '#2ecc71'
+            });
             return;
         }
 
@@ -105,9 +124,6 @@ function Cart() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log("Quantity updated:", response.data);
-
-            // Update the local state with the new quantity
             setCartItems((prev) => {
                 const updated = prev.map((item) =>
                     item._id === itemId ? { ...item, quantity: newQuantity } : item
@@ -115,8 +131,13 @@ function Cart() {
                 return updated;
             });
         } catch (error) {
-            console.error("Error updating quantity:", error.response ? error.response.data : error.message);
-            alert("Failed to update quantity.");
+            console.error("Error updating quantity:", error.response?.data || error.message);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to update quantity.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
         }
     };
 
@@ -140,7 +161,20 @@ function Cart() {
     const handleCheckout = async () => {
         const token = localStorage.getItem("auth_token");
         if (!token) {
-            alert("Please log in to proceed with checkout.");
+            Swal.fire({
+                title: 'Authentication Required',
+                text: 'Please log in to proceed with checkout.',
+                icon: 'warning',
+                confirmButtonText: 'Go to Login',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#2ecc71',
+                cancelButtonColor: '#e74c3c'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate('/login');
+                }
+            });
             return;
         }
     
@@ -155,23 +189,33 @@ function Cart() {
                     totalPrice: item.price * item.quantity
                 };
     
-                const response = await axios.post(
+                await axios.post(
                     "http://localhost:5003/api/order/add",
                     orderData,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
-    
-                console.log("Order placed:", response.data);
             }
     
-            alert("Order placed successfully!");
+            Swal.fire({
+                title: 'Success!',
+                text: 'Order placed successfully!',
+                icon: 'success',
+                confirmButtonColor: '#2ecc71',
+                timer: 2000,
+                timerProgressBar: true
+            });
             // Optionally clear only selected orders from cart
             const remainingCartItems = cartItems.filter(item => !selectedOrders.includes(item._id));
             setCartItems(remainingCartItems);
             setSelectedOrders([]);
         } catch (error) {
             console.error("Error placing order:", error.response?.data || error.message);
-            alert("Failed to place order. Please try again.");
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to place order. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
         }
     };
     

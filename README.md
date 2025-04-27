@@ -1,5 +1,5 @@
 # 🍔 FoodieFly 
-# Cloud-Native Food Ordering & Delivery System
+# Food Ordering & Delivery System
 
 <div align="center">
   <img src="frontend/src/images/logo.png" alt="FoodieFly Logo" width="200"/>

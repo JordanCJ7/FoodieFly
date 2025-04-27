@@ -3,6 +3,7 @@ import "./SignUp.css";
 import SignUpImage from "../../../images/signup.png";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 // List of Sri Lankan cities
 const sriLankanCities = [
@@ -164,30 +165,52 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      const transformedData = {
-        first_name: formData.FirstName,
-        last_name: formData.LastName,
-        mobile_number: formData.MobileNumber,
-        email: formData.Email,
-        city: formData.City,
-        password: formData.Password,
-        role: formData.Role,
-      };
-      console.log("Payload being sent to backend:", transformedData);
+      // Show loading state
+      Swal.fire({
+        title: 'Creating your account...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       const response = await axios.post(
         "http://localhost:5001/api/auth/register",
-        transformedData
+        formData
       );
-      navigate("/login");
 
-      console.log(response.data.message);
-      alert("User registered successfully!");
-    } catch (error) {
-      console.error("Error during registration:", error.response?.data?.error);
-      const errorMessage =
-        error.response?.data?.error || "An unexpected error occurred.";
-      alert(`Error during registration: ${errorMessage}`);
+      // Show success message
+      await Swal.fire({
+        icon: 'success',
+        title: 'Welcome to FoodieFly!',
+        text: 'Your account has been created successfully.',
+        confirmButtonColor: 'var(--primary-color)',
+        timer: 2000,
+        timerProgressBar: true
+      });
+
+      // Store the token
+      localStorage.setItem("auth_token", response.data.token);
+
+      // Navigate based on role
+      if (formData.Role === "customer") {
+        navigate("/");
+      } else if (formData.Role === "restaurantAdmin") {
+        navigate("/restaurant-register");
+      } else if (formData.Role === "deliveryPersonnel") {
+        navigate("/delivery-home");
+      }
+    } catch (err) {
+      console.error("Registration error:", err.response?.data?.error);
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Registration Failed',
+        text: err.response?.data?.error || "An unexpected error occurred.",
+        confirmButtonColor: 'var(--primary-color)',
+      });
     }
   };
 

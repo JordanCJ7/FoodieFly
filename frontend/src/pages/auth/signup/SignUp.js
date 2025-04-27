@@ -4,6 +4,7 @@ import SignUpImage from "../../../images/signup.png";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from 'sweetalert2';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 // List of Sri Lankan cities
 const sriLankanCities = [
@@ -27,6 +28,9 @@ function SignUp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filteredCities, setFilteredCities] = useState(sriLankanCities);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const [formData, setFormData] = useState({
     FirstName: "",
     LastName: "",
@@ -70,13 +74,86 @@ function SignUp() {
     setFormData({ ...formData, City: city }); // Update city in form data
   };
 
+  // Password strength calculation
+  const calculatePasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    return strength;
+  };
+
+  const getPasswordStrengthColor = (strength) => {
+    switch (strength) {
+      case 0:
+      case 1:
+        return '#ff4444';
+      case 2:
+      case 3:
+        return '#ffbb33';
+      case 4:
+      case 5:
+        return '#00C851';
+      default:
+        return '#ff4444';
+    }
+  };
+
+  // Real-time validation
+  const validateField = (name, value) => {
+    let error = '';
+    switch (name) {
+      case 'Email':
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+      case 'MobileNumber':
+        if (!/^[0-9]{10}$/.test(value)) {
+          error = 'Please enter a valid 10-digit mobile number';
+        }
+        break;
+      case 'Password':
+        if (value.length < 8) {
+          error = 'Password must be at least 8 characters long';
+        }
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Validate field in real-time
+    const error = validateField(name, value);
+    setValidationErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields before submission
+    const errors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) errors[key] = error;
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setIsSubmitting(true);
     
     try {
       // Show loading state
@@ -123,6 +200,8 @@ function SignUp() {
         text: err.response?.data?.error || "An unexpected error occurred.",
         confirmButtonColor: 'var(--primary-color)',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -239,16 +318,49 @@ function SignUp() {
             <label className="labelS" htmlFor="Password">
               Password
             </label>
-            <input
-              className="inputS"
-              type="password"
-              id="Password"
-              name="Password"
-              placeholder="Enter your password"
-              value={formData.Password}
-              onChange={handleChange}
-              required
-            />
+            <div className="password-input-container">
+              <input
+                className="inputS"
+                type={showPassword ? "text" : "password"}
+                id="Password"
+                name="Password"
+                placeholder="Enter your password"
+                value={formData.Password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {formData.Password && (
+              <div className="password-strength">
+                <div className="strength-bar">
+                  {[...Array(5)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="strength-segment"
+                      style={{
+                        backgroundColor: index < calculatePasswordStrength(formData.Password)
+                          ? getPasswordStrengthColor(calculatePasswordStrength(formData.Password))
+                          : '#e0e0e0'
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="strength-text">
+                  {calculatePasswordStrength(formData.Password) <= 2 ? 'Weak' :
+                   calculatePasswordStrength(formData.Password) <= 3 ? 'Medium' : 'Strong'}
+                </span>
+              </div>
+            )}
+            {validationErrors.Password && (
+              <span className="error-message">{validationErrors.Password}</span>
+            )}
           </div>
           {/* Account Type Selection */}
           <div className="form-groupS account-type-section">
@@ -307,8 +419,12 @@ function SignUp() {
               </div>
             </div>
           </div>
-          <button type="submit" className="signup-button">
-            Sign Up
+          <button 
+            type="submit" 
+            className="signup-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
         <div className="login-link">

@@ -222,3 +222,45 @@ exports.getMenuItemById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get menu items for home page with search functionality
+exports.getHomeMenuItems = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const search = req.query.search || '';
+
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    
+    // Add search functionality
+    if (search) {
+      query = {
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { restaurant: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
+    const total = await MenuItem.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+
+    const menuItems = await MenuItem.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      data: menuItems,
+      currentPage: page,
+      totalPages,
+      totalItems: total
+    });
+  } catch (error) {
+    console.error('Error fetching menu items:', error);
+    res.status(500).json({ error: 'Failed to fetch menu items' });
+  }
+};

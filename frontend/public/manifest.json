@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "FoodieFly",
+  "name": "FoodieFly - Food Ordering & Delivery System",
   "icons": [
     {
       "src": "favicon.ico",

@@ -9,12 +9,11 @@ function Cart() {
     const [cartItems, setCartItems] = useState([]);
     const [selectedOrders, setSelectedOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [sdkReady, setSdkReady] = useState(false); // State to check if SDK is ready
+    const [sdkReady, setSdkReady] = useState(false);
 
-
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
     const handlePaymentDetailsClick = () => {
-        navigate("/payment-details"); // Navigate to the payment details page
+        navigate("/payment-details");
     };
 
     useEffect(() => {
@@ -35,6 +34,7 @@ function Cart() {
                     const itemsWithQuantity = (data.items || []).map((item) => ({
                         ...item,
                         quantity: item.quantity || 1,
+                        totalPrice: (item.price || 0) * (item.quantity || 1)
                     }));
                     setCartItems(itemsWithQuantity);
                 } else {
@@ -48,14 +48,35 @@ function Cart() {
         };
 
         fetchCartItems();
-
-        if (!window.paypal) {
-            addPayPalScript();
-        } else {
-            setSdkReady(true);
-        }
-        
     }, []);
+
+    // Separate useEffect for PayPal script
+    useEffect(() => {
+        const loadPayPalScript = async () => {
+            try {
+                if (!window.paypal && selectedOrders.length > 0) {
+                    const {data: clientId} = await axios.get("http://localhost:5010/api/config/paypal");
+                    const script = document.createElement("script");
+                    script.type = "text/javascript";
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+                    script.async = true;
+                    script.onload = () => {
+                        setSdkReady(true);
+                    };
+                    script.onerror = () => {
+                        console.error("Failed to load PayPal SDK");
+                        setSdkReady(false);
+                    };
+                    document.body.appendChild(script);
+                }
+            } catch (error) {
+                console.error("Error loading PayPal script:", error);
+                setSdkReady(false);
+            }
+        };
+
+        loadPayPalScript();
+    }, [selectedOrders]);
 
     const removeItem = async (id) => {
         const token = localStorage.getItem("auth_token");
@@ -72,7 +93,7 @@ function Cart() {
             });
 
             if (result.isConfirmed) {
-                const response = await axios.delete(`http://localhost:5003/api/cart/remove/${id}`, {
+                await axios.delete(`http://localhost:5003/api/cart/remove/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -101,7 +122,6 @@ function Cart() {
         }
     };
 
-    // Update item quantity in the cart
     const updateQuantity = async (itemId, change) => {
         const item = cartItems.find((item) => item._id === itemId);
         const newQuantity = item.quantity + change;
@@ -118,17 +138,22 @@ function Cart() {
 
         try {
             const token = localStorage.getItem("auth_token");
-            const response = await axios.put(
+            await axios.put(
                 "http://localhost:5003/api/cart/update",
                 { itemId, quantity: newQuantity },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setCartItems((prev) => {
-                const updated = prev.map((item) =>
-                    item._id === itemId ? { ...item, quantity: newQuantity } : item
+                return prev.map((item) =>
+                    item._id === itemId 
+                        ? { 
+                            ...item, 
+                            quantity: newQuantity,
+                            totalPrice: item.price * newQuantity 
+                        } 
+                        : item
                 );
-                return updated;
             });
         } catch (error) {
             console.error("Error updating quantity:", error.response?.data || error.message);
@@ -141,21 +166,33 @@ function Cart() {
         }
     };
 
-
-
-    const clearCart = () => {
-        setCartItems([]);
-        setSelectedOrders([]);
+    const clearCart = async () => {
+        try {
+            const token = localStorage.getItem("auth_token");
+            await axios.delete("http://localhost:5003/api/cart/clear", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCartItems([]);
+            setSelectedOrders([]);
+        } catch (error) {
+            console.error("Error clearing cart:", error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to clear cart.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
     };
 
-
-
     const handleSelectOrder = (id) => {
-        if (selectedOrders.includes(id)) {
-            setSelectedOrders(selectedOrders.filter((orderId) => orderId !== id));
-        } else {
-            setSelectedOrders([...selectedOrders, id]);
-        }
+        setSelectedOrders(prev => {
+            if (prev.includes(id)) {
+                return prev.filter(orderId => orderId !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
     };
 
     const handleCheckout = async () => {
@@ -183,7 +220,6 @@ function Cart() {
         try {
             for (const item of selectedItems) {
                 const orderData = {
-                    //restaurantId: item.restaurantId, // This must be part of cart item
                     itemId: item._id,
                     quantity: item.quantity,
                     totalPrice: item.price * item.quantity
@@ -204,7 +240,7 @@ function Cart() {
                 timer: 2000,
                 timerProgressBar: true
             });
-            // Optionally clear only selected orders from cart
+
             const remainingCartItems = cartItems.filter(item => !selectedOrders.includes(item._id));
             setCartItems(remainingCartItems);
             setSelectedOrders([]);
@@ -218,95 +254,92 @@ function Cart() {
             });
         }
     };
-    
 
+    // Calculate totals
+    const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
     const selectedTotal = cartItems
         .filter((item) => selectedOrders.includes(item._id))
-        .reduce((total, item) => total + item.price * item.quantity, 0);
+        .reduce((total, item) => total + (item.price * item.quantity), 0);
 
     const deliveryFee = selectedOrders.length > 0 ? 200 : 0;
     const totalPrice = selectedTotal + deliveryFee;
 
-
-    //// Function to dynamically load the PayPal SDK script
-    const addPayPalScript = async () => {
-        const {data: clientId} = await axios.get("http://localhost:5010/api/config/paypal");
-        console.log(clientId);
-            
-        // Load PayPal script dynamically
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`; // Add your PayPal client ID
-        script.async = true;
-        script.onload = () => {
-            // PayPal script loaded successfully
-            console.log("PayPal script loaded");
-            setSdkReady(true); // Set SDK ready state to true
-        };
-        document.body.appendChild(script);
-    };
-
+    // Render PayPal buttons only when SDK is ready and items are selected
     useEffect(() => {
-        if (sdkReady && selectedOrders.length > 0) {
-            // Clear the PayPal button container before rendering a new button
-            const paypalContainer = document.getElementById("paypal-button-container");
-            if (paypalContainer) {
-                paypalContainer.innerHTML = ""; // Clear the container
-            }
-
-            window.paypal.Buttons({
-                createOrder: (data, actions) => {
-                    return actions.order.create({
-                        purchase_units: [
-                            {
-                                amount: {
-                                    value: totalPrice.toFixed(2),
-                                    currency_code: "USD",
-                                },
-                            },
-                        ],
-                    });
-                },
-                onApprove: async (data, actions) => {
-                    const details = await actions.order.capture();
-                    const payer = details.payer;
-                    const purchaseUnit = details.purchase_units[0];
-
-                    localStorage.setItem("order_id", details.id);// Store paypal order ID in local storage
-
-                    alert(`Transaction completed by ${details.payer.name.given_name}`);
-                    console.log("Payment Details:", details);
-
-                    try {
-                        await axios.post("http://localhost:5010/api/payment/paypalDetails",
-                            {
-                                orderId: details.id,
-                                payerName: `${payer.name.given_name} ${payer.name.surname}`,
-                                amount: parseFloat(purchaseUnit.amount.value),
-                                currency: purchaseUnit.amount.currency_code,
-                                paymentDetails: details,
-                            },
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                                },
-                            }
-                        );
-                        console.log("✅ Payment info saved to DB");
-                    } catch (error) {
-                        console.error("❌ Failed to save payment:", error);
-                    }
+        if (sdkReady && selectedOrders.length > 0 && window.paypal) {
+            try {
+                const paypalContainer = document.getElementById("paypal-button-container");
+                if (paypalContainer) {
+                    paypalContainer.innerHTML = "";
                     
-                },
-                onError: (err) => {
-                    console.error("PayPal Payment Error:", err);
-                },
-            }).render("#paypal-button-container");
+                    window.paypal.Buttons({
+                        createOrder: (data, actions) => {
+                            return actions.order.create({
+                                purchase_units: [
+                                    {
+                                        amount: {
+                                            value: totalPrice.toFixed(2),
+                                            currency_code: "USD",
+                                        },
+                                    },
+                                ],
+                            });
+                        },
+                        onApprove: async (data, actions) => {
+                            try {
+                                const details = await actions.order.capture();
+                                const payer = details.payer;
+                                const purchaseUnit = details.purchase_units[0];
+
+                                localStorage.setItem("order_id", details.id);
+
+                                await axios.post("http://localhost:5010/api/payment/paypalDetails",
+                                    {
+                                        orderId: details.id,
+                                        payerName: `${payer.name.given_name} ${payer.name.surname}`,
+                                        amount: parseFloat(purchaseUnit.amount.value),
+                                        currency: purchaseUnit.amount.currency_code,
+                                        paymentDetails: details,
+                                    },
+                                    {
+                                        headers: {
+                                            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                                        },
+                                    }
+                                );
+
+                                Swal.fire({
+                                    title: 'Payment Successful!',
+                                    text: `Thank you for your purchase, ${payer.name.given_name}!`,
+                                    icon: 'success',
+                                    confirmButtonColor: '#2ecc71'
+                                });
+                            } catch (error) {
+                                console.error("Payment processing error:", error);
+                                Swal.fire({
+                                    title: 'Payment Error',
+                                    text: 'There was an error processing your payment.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#e74c3c'
+                                });
+                            }
+                        },
+                        onError: (err) => {
+                            console.error("PayPal Payment Error:", err);
+                            Swal.fire({
+                                title: 'Payment Error',
+                                text: 'There was an error with PayPal. Please try again.',
+                                icon: 'error',
+                                confirmButtonColor: '#e74c3c'
+                            });
+                        },
+                    }).render("#paypal-button-container");
+                }
+            } catch (error) {
+                console.error("Error rendering PayPal buttons:", error);
+            }
         }
     }, [sdkReady, selectedOrders, totalPrice]);
-
-
-
 
     if (loading) return <div>Loading...</div>;
 
@@ -337,7 +370,7 @@ function Cart() {
                                 <div className="cart-item-details">
                                     <span className="cart-item-name">{item.name}</span>
                                     <span className="cart-item-price">
-                                        LKR.{item.price.toFixed(2)}
+                                        LKR {item.price.toFixed(2)} × {item.quantity} = LKR {(item.price * item.quantity).toFixed(2)}
                                     </span>
                                 </div>
                                 <div className="quantity-controls">
@@ -370,16 +403,20 @@ function Cart() {
 
                     <div className="cart-summary">
                         <div className="summary-row">
-                            <span>Subtotal</span>
-                            <span>LKR.{selectedTotal.toFixed(2)}</span>
+                            <span>Cart Subtotal ({cartItems.length} items)</span>
+                            <span>LKR {cartTotal.toFixed(2)}</span>
                         </div>
                         <div className="summary-row">
-                            <span>Delivery</span>
-                            <span>LKR.{deliveryFee.toFixed(2)}</span>
+                            <span>Selected Items ({selectedOrders.length} items)</span>
+                            <span>LKR {selectedTotal.toFixed(2)}</span>
+                        </div>
+                        <div className="summary-row">
+                            <span>Delivery Fee</span>
+                            <span>LKR {deliveryFee.toFixed(2)}</span>
                         </div>
                         <div className="summary-row total">
-                            <span>Total</span>
-                            <span>LKR.{totalPrice.toFixed(2)}</span>
+                            <span>Total to Pay</span>
+                            <span>LKR {totalPrice.toFixed(2)}</span>
                         </div>
                     </div>
 
@@ -388,8 +425,10 @@ function Cart() {
                         disabled={selectedOrders.length === 0}
                         onClick={handleCheckout}
                     >
-                        CHECK OUT
+                        CHECK OUT ({selectedOrders.length} items)
                     </button>
+
+                    <div id="paypal-button-container"></div>
                 </>
             )}
         </div>

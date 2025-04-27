@@ -32,13 +32,13 @@ function SignUp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [formData, setFormData] = useState({
-    FirstName: "",
-    LastName: "",
-    MobileNumber: "",
-    Email: "",
-    City: "",
-    Password: "",
-    Role: "customer", // Default role
+    first_name: "",
+    last_name: "",
+    mobile_number: "",
+    email: "",
+    city: "",
+    password: "",
+    role: "customer", // Default role
   });
   const dropdownRef = useRef(null);
   const navigate = useNavigate(); // Hook for navigation
@@ -71,7 +71,7 @@ function SignUp() {
   const handleCitySelect = (city) => {
     setSearchTerm(city);
     setIsDropdownOpen(false);
-    setFormData({ ...formData, City: city }); // Update city in form data
+    setFormData({ ...formData, city: city }); // Update city in form data
   };
 
   // Password strength calculation
@@ -105,17 +105,17 @@ function SignUp() {
   const validateField = (name, value) => {
     let error = '';
     switch (name) {
-      case 'Email':
+      case 'email':
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           error = 'Please enter a valid email address';
         }
         break;
-      case 'MobileNumber':
+      case 'mobile_number':
         if (!/^[0-9]{10}$/.test(value)) {
           error = 'Please enter a valid 10-digit mobile number';
         }
         break;
-      case 'Password':
+      case 'password':
         if (value.length < 5) {
           error = 'Password must be at least 5 characters long';
         }
@@ -184,11 +184,11 @@ function SignUp() {
       localStorage.setItem("auth_token", response.data.token);
 
       // Navigate based on role
-      if (formData.Role === "customer") {
+      if (formData.role === "customer") {
         navigate("/");
-      } else if (formData.Role === "restaurantAdmin") {
+      } else if (formData.role === "restaurantAdmin") {
         navigate("/restaurant-register");
-      } else if (formData.Role === "deliveryPersonnel") {
+      } else if (formData.role === "deliveryPersonnel") {
         navigate("/delivery-home");
       }
     } catch (err) {
@@ -222,9 +222,9 @@ function SignUp() {
                 className="inputS"
                 type="text"
                 id="FirstName"
-                name="FirstName"
+                name="first_name"
                 placeholder="Enter your first name"
-                value={formData.FirstName}
+                value={formData.first_name}
                 onChange={handleChange}
                 required
               />
@@ -237,9 +237,9 @@ function SignUp() {
                 className="inputS"
                 type="text"
                 id="LastName"
-                name="LastName"
+                name="last_name"
                 placeholder="Enter your last name"
-                value={formData.LastName}
+                value={formData.last_name}
                 onChange={handleChange}
                 required
               />
@@ -253,14 +253,14 @@ function SignUp() {
               className="inputS"
               type="tel"
               id="MobileNumber"
-              name="MobileNumber"
+              name="mobile_number"
               placeholder="Enter your mobile number"
-              value={formData.MobileNumber}
+              value={formData.mobile_number}
               onChange={handleChange}
               required
             />
-            {validationErrors.MobileNumber && (
-              <span className="error-message">{validationErrors.MobileNumber}</span>
+            {validationErrors.mobile_number && (
+              <span className="error-message">{validationErrors.mobile_number}</span>
             )}
           </div>
           <div className="form-groupS">
@@ -271,14 +271,14 @@ function SignUp() {
               className="inputS"
               type="email"
               id="Email"
-              name="Email"
+              name="email"
               placeholder="Enter your email address"
-              value={formData.Email}
+              value={formData.email}
               onChange={handleChange}
               required
             />
-            {validationErrors.Email && (
-              <span className="error-message">{validationErrors.Email}</span>
+            {validationErrors.email && (
+              <span className="error-message">{validationErrors.email}</span>
             )}
           </div>
           {/* City Dropdown */}
@@ -291,7 +291,7 @@ function SignUp() {
                 className="inputS city-search"
                 type="text"
                 id="City"
-                name="City"
+                name="city"
                 placeholder="Search for your city"
                 value={searchTerm}
                 onChange={(e) => {
@@ -329,9 +329,9 @@ function SignUp() {
                 className="inputS"
                 type={showPassword ? "text" : "password"}
                 id="Password"
-                name="Password"
+                name="password"
                 placeholder="Enter your password"
-                value={formData.Password}
+                value={formData.password}
                 onChange={handleChange}
                 required
               />
@@ -343,7 +343,7 @@ function SignUp() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-            {formData.Password && (
+            {formData.password && (
               <div className="password-strength">
                 <div className="strength-bar">
                   {[...Array(5)].map((_, index) => (
@@ -351,21 +351,21 @@ function SignUp() {
                       key={index}
                       className="strength-segment"
                       style={{
-                        backgroundColor: index < calculatePasswordStrength(formData.Password)
-                          ? getPasswordStrengthColor(calculatePasswordStrength(formData.Password))
+                        backgroundColor: index < calculatePasswordStrength(formData.password)
+                          ? getPasswordStrengthColor(calculatePasswordStrength(formData.password))
                           : '#e0e0e0'
                       }}
                     />
                   ))}
                 </div>
                 <span className="strength-text">
-                  {calculatePasswordStrength(formData.Password) <= 2 ? 'Weak' :
-                   calculatePasswordStrength(formData.Password) <= 3 ? 'Medium' : 'Strong'}
+                  {calculatePasswordStrength(formData.password) <= 2 ? 'Weak' :
+                   calculatePasswordStrength(formData.password) <= 3 ? 'Medium' : 'Strong'}
                 </span>
               </div>
             )}
-            {validationErrors.Password && (
-              <span className="error-message">{validationErrors.Password}</span>
+            {validationErrors.password && (
+              <span className="error-message">{validationErrors.password}</span>
             )}
           </div>
           {/* Account Type Selection */}
@@ -379,9 +379,9 @@ function SignUp() {
                 <input
                   type="radio"
                   id="customer"
-                  name="Role"
+                  name="role"
                   value="customer"
-                  checked={formData.Role === "customer"}
+                  checked={formData.role === "customer"}
                   onChange={handleChange}
                 />
                 <label htmlFor="customer" className="account-type-label">
@@ -395,9 +395,9 @@ function SignUp() {
                 <input
                   type="radio"
                   id="business"
-                  name="Role"
+                  name="role"
                   value="restaurantAdmin"
-                  checked={formData.Role === "restaurantAdmin"}
+                  checked={formData.role === "restaurantAdmin"}
                   onChange={handleChange}
                 />
                 <label htmlFor="business" className="account-type-label">
@@ -411,9 +411,9 @@ function SignUp() {
                 <input
                   type="radio"
                   id="delivery"
-                  name="Role"
+                  name="role"
                   value="deliveryPersonnel"
-                  checked={formData.Role === "deliveryPersonnel"}
+                  checked={formData.role === "deliveryPersonnel"}
                   onChange={handleChange}
                 />
                 <label htmlFor="delivery" className="account-type-label">

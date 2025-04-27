@@ -10,19 +10,31 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Swal from 'sweetalert2';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: '',
     mobile_number: '',
     city: ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
   const navigate = useNavigate();
 
@@ -67,7 +79,9 @@ const Profile = () => {
       confirmButtonColor: '#4CAF50',
       timer: 2000,
       timerProgressBar: true,
-      showConfirmButton: false
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
     });
   };
 
@@ -76,7 +90,11 @@ const Profile = () => {
       title: 'Error!',
       text: message,
       icon: 'error',
-      confirmButtonColor: '#f44336'
+      confirmButtonColor: '#f44336',
+      toast: true,
+      position: 'top-end',
+      timer: 3000,
+      timerProgressBar: true
     });
   };
 
@@ -88,8 +106,17 @@ const Profile = () => {
     }));
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleUpdateProfile = async () => {
     try {
+      setIsUpdating(true);
       const token = localStorage.getItem('auth_token');
       if (!token) {
         showErrorAlert('Authentication token is missing. Please log in again.');
@@ -112,6 +139,62 @@ const Profile = () => {
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update profile';
       showErrorAlert(errorMessage);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    try {
+      setIsUpdating(true);
+      // Validate passwords
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        showErrorAlert('New passwords do not match');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 5) {
+        showErrorAlert('New password must be at least 5 characters long');
+        return;
+      }
+
+      if (passwordData.newPassword === passwordData.currentPassword) {
+        showErrorAlert('New password cannot be the same as your current password');
+        return;
+      }
+
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        showErrorAlert('Authentication token is missing. Please log in again.');
+        return;
+      }
+
+      await axios.put(
+        'http://localhost:5001/api/auth/password',
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Clear password form
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordForm(false);
+      showSuccessAlert('Password updated successfully!');
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to update password';
+      showErrorAlert(errorMessage);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -137,10 +220,17 @@ const Profile = () => {
         cancelButtonColor: '#4CAF50',
         confirmButtonText: 'Yes, delete my profile',
         cancelButtonText: 'Cancel',
-        reverseButtons: true
+        reverseButtons: true,
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp'
+        }
       });
 
       if (result.isConfirmed) {
+        setIsUpdating(true);
         const token = localStorage.getItem('auth_token');
         if (!token) {
           showErrorAlert('Authentication token is missing. Please log in again.');
@@ -163,7 +253,10 @@ const Profile = () => {
           confirmButtonColor: '#4CAF50',
           timer: 2000,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
+          showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+          }
         });
 
         navigate('/login');
@@ -171,6 +264,8 @@ const Profile = () => {
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to delete profile';
       showErrorAlert(errorMessage);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -178,7 +273,7 @@ const Profile = () => {
     return (
       <div className="profile-loading">
         <div className="loading-spinner"></div>
-        Loading profile...
+        <p className="loading-text">Loading your profile...</p>
       </div>
     );
   }
@@ -197,6 +292,7 @@ const Profile = () => {
               value={formData[fieldName]}
               onChange={handleInputChange}
               className="profile-input"
+              placeholder={`Enter your ${label.toLowerCase()}`}
             />
           ) : (
             <div className="field-value">{value}</div>
@@ -205,6 +301,35 @@ const Profile = () => {
       </div>
     );
   };
+
+  const renderPasswordField = (label, name, showPassword, setShowPassword) => (
+    <div className="profile-field">
+      <div className="field-icon">
+        <LockIcon />
+      </div>
+      <div className="field-content">
+        <label>{label}</label>
+        <div className="password-input-container">
+          <input
+            type={showPassword ? "text" : "password"}
+            name={name}
+            value={passwordData[name]}
+            onChange={handlePasswordChange}
+            className="profile-input"
+            placeholder={`Enter your ${label.toLowerCase()}`}
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="profile-container">
@@ -215,20 +340,36 @@ const Profile = () => {
         <h1>My Profile</h1>
         <div className="profile-actions">
           {!isEditing ? (
-            <button className="edit-button" onClick={() => setIsEditing(true)}>
+            <button 
+              className="edit-button" 
+              onClick={() => setIsEditing(true)}
+              disabled={isUpdating}
+            >
               <EditIcon /> Edit Profile
             </button>
           ) : (
             <div className="edit-actions">
-              <button className="save-button" onClick={handleUpdateProfile}>
-                <SaveIcon /> Save
+              <button 
+                className="save-button" 
+                onClick={handleUpdateProfile}
+                disabled={isUpdating}
+              >
+                <SaveIcon /> {isUpdating ? 'Saving...' : 'Save'}
               </button>
-              <button className="cancel-button" onClick={handleCancelEdit}>
+              <button 
+                className="cancel-button" 
+                onClick={handleCancelEdit}
+                disabled={isUpdating}
+              >
                 <CancelIcon /> Cancel
               </button>
             </div>
           )}
-          <button className="delete-button" onClick={handleDeleteProfile}>
+          <button 
+            className="delete-button" 
+            onClick={handleDeleteProfile}
+            disabled={isUpdating}
+          >
             <DeleteIcon /> Delete Profile
           </button>
         </div>
@@ -253,6 +394,48 @@ const Profile = () => {
             {renderProfileField(<EmailIcon />, "Email Address", user.email, 'email')}
             {renderProfileField(<PhoneIcon />, "Phone Number", user.mobile_number, 'mobile_number')}
             {renderProfileField(<LocationCityIcon />, "City", user.city, 'city')}
+          </div>
+
+          <div className="profile-info-section">
+            <div className="section-header">
+              <h2>Password Management</h2>
+              <button
+                className="change-password-button"
+                onClick={() => setShowPasswordForm(!showPasswordForm)}
+                disabled={isUpdating}
+              >
+                {showPasswordForm ? 'Cancel' : 'Change Password'}
+              </button>
+            </div>
+            {showPasswordForm && (
+              <div className="password-form">
+                {renderPasswordField(
+                  "Current Password",
+                  "currentPassword",
+                  showCurrentPassword,
+                  setShowCurrentPassword
+                )}
+                {renderPasswordField(
+                  "New Password",
+                  "newPassword",
+                  showNewPassword,
+                  setShowNewPassword
+                )}
+                {renderPasswordField(
+                  "Confirm New Password",
+                  "confirmPassword",
+                  showConfirmPassword,
+                  setShowConfirmPassword
+                )}
+                <button
+                  className="update-password-button"
+                  onClick={handleUpdatePassword}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

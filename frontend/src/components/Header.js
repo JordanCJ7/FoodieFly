@@ -7,6 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -132,6 +133,16 @@ function Header() {
             <Link to={homeRoute} className="logo-container">
               <div className="logo">FoodieFly</div>
             </Link>
+          </div>
+
+          {/* Center - Navigation Links */}
+          <div className="header-center">
+            {userRole === "customer" && (
+              <Link to="/restaurants" className="nav-link">
+                <RestaurantIcon />
+                <span>Restaurants</span>
+              </Link>
+            )}
           </div>
 
           {/* Right side - Auth buttons and icons */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Cart.css";
@@ -7,54 +7,109 @@ import Swal from 'sweetalert2';
 
 function Cart() {
     const [cartItems, setCartItems] = useState([]);
-    const [selectedOrders, setSelectedOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedItems, setSelectedItems] = useState([]);
     const [sdkReady, setSdkReady] = useState(false);
-
+    const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const navigate = useNavigate();
+
     const handlePaymentDetailsClick = () => {
         navigate("/payment-details");
     };
 
     useEffect(() => {
-        const fetchCartItems = async () => {
+        console.log('Cart component mounted, fetching items...');
+        fetchCartItems();
+    }, []);
+
+    const fetchCartItems = async () => {
+        try {
             const token = localStorage.getItem("auth_token");
             if (!token) {
-                alert("Please log in to view your cart.");
+                Swal.fire({
+                    title: 'Please Login',
+                    text: 'You need to be logged in to view your cart',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Login',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#2ecc71',
+                    cancelButtonColor: '#e74c3c'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate("/login");
+                    }
+                });
                 return;
             }
 
-            try {
-                const response = await fetch("http://localhost:5003/api/cart", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+            setLoading(true);
+            console.log('Fetching cart with token:', token);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const itemsWithQuantity = (data.items || []).map((item) => ({
-                        ...item,
-                        quantity: item.quantity || 1,
-                        totalPrice: (item.price || 0) * (item.quantity || 1)
-                    }));
-                    setCartItems(itemsWithQuantity);
-                } else {
-                    console.error("Failed to fetch cart");
-                }
-            } catch (err) {
-                console.error("Error fetching cart:", err);
-            } finally {
-                setLoading(false);
+            const response = await fetch("http://localhost:5003/api/cart", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+            console.log('Cart API response:', data);
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to fetch cart items");
             }
-        };
 
-        fetchCartItems();
-    }, []);
+            if (!data.items || !Array.isArray(data.items)) {
+                console.log('No items array in response or invalid format');
+                setCartItems([]);
+                setLoading(false);
+                return;
+            }
+
+            // Process the cart items to ensure consistent structure
+            const processedItems = data.items.map(item => {
+                console.log('Processing item:', item);
+                return {
+                    _id: item._id || item.itemId,
+                    name: item.name || 'Unknown Item',
+                    price: parseFloat(item.price || 0),
+                    quantity: parseInt(item.quantity || 1),
+                    img: item.img || item.image || '/placeholder-food-image.jpg',
+                    totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1),
+                    restaurant_id: item.restaurant_id || '',
+                    restaurant_name: item.restaurant_name || 'Unknown Restaurant'
+                };
+            });
+
+            console.log('Processed cart items:', processedItems);
+            setCartItems(processedItems);
+        } catch (error) {
+            console.error("Error fetching cart:", error);
+            setError(error.message);
+            Swal.fire({
+                title: 'Error!',
+                text: error.message || 'Failed to fetch cart items. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Reset selected restaurant when no items are selected
+    useEffect(() => {
+        if (selectedItems.length === 0) {
+            setSelectedRestaurant(null);
+        }
+    }, [selectedItems]);
 
     // Separate useEffect for PayPal script
     useEffect(() => {
         const loadPayPalScript = async () => {
             try {
-                if (!window.paypal && selectedOrders.length > 0) {
+                if (!window.paypal && selectedItems.length > 0) {
                     const {data: clientId} = await axios.get("http://localhost:5010/api/config/paypal");
                     const script = document.createElement("script");
                     script.type = "text/javascript";
@@ -76,7 +131,7 @@ function Cart() {
         };
 
         loadPayPalScript();
-    }, [selectedOrders]);
+    }, [selectedItems]);
 
     const removeItem = async (id) => {
         const token = localStorage.getItem("auth_token");
@@ -100,7 +155,7 @@ function Cart() {
                 });
 
                 setCartItems((prev) => prev.filter((item) => item._id !== id));
-                setSelectedOrders((prev) => prev.filter((orderId) => orderId !== id));
+                setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
 
                 Swal.fire({
                     title: 'Removed!',
@@ -122,63 +177,102 @@ function Cart() {
         }
     };
 
-    const updateQuantity = async (itemId, change) => {
-        const item = cartItems.find((item) => item._id === itemId);
-        const newQuantity = item.quantity + change;
-
-        if (newQuantity <= 0) {
-            Swal.fire({
-                title: 'Invalid Quantity',
-                text: 'Quantity cannot be less than 1',
-                icon: 'warning',
-                confirmButtonColor: '#2ecc71'
-            });
-            return;
-        }
+    const updateQuantity = async (itemId, newQuantity) => {
+        if (newQuantity < 1) return;
 
         try {
             const token = localStorage.getItem("auth_token");
-            await axios.put(
-                "http://localhost:5003/api/cart/update",
-                { itemId, quantity: newQuantity },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const response = await fetch(`http://localhost:5003/api/cart/${itemId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ quantity: newQuantity }),
+            });
 
-            setCartItems((prev) => {
-                return prev.map((item) =>
-                    item._id === itemId 
-                        ? { 
-                            ...item, 
+            if (!response.ok) {
+                throw new Error("Failed to update quantity");
+            }
+
+            setCartItems(prevItems =>
+                prevItems.map(item =>
+                    item._id === itemId
+                        ? {
+                            ...item,
                             quantity: newQuantity,
-                            totalPrice: item.price * newQuantity 
-                        } 
+                            totalPrice: item.price * newQuantity
+                        }
                         : item
-                );
-            });
+                )
+            );
         } catch (error) {
-            console.error("Error updating quantity:", error.response?.data || error.message);
-            Swal.fire({
-                title: 'Error!',
-                text: 'Failed to update quantity.',
-                icon: 'error',
-                confirmButtonColor: '#e74c3c'
-            });
+            console.error("Error updating quantity:", error);
+            alert("Failed to update quantity. Please try again.");
         }
     };
 
     const clearCart = async () => {
         try {
             const token = localStorage.getItem("auth_token");
-            await axios.delete("http://localhost:5003/api/cart/clear", {
-                headers: { Authorization: `Bearer ${token}` }
+            if (!token) {
+                Swal.fire({
+                    title: 'Please Login',
+                    text: 'You need to be logged in to clear your cart',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Login',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#2ecc71',
+                    cancelButtonColor: '#e74c3c'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate("/login");
+                    }
+                });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "This will remove all items from your cart!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2ecc71',
+                cancelButtonColor: '#e74c3c',
+                confirmButtonText: 'Yes, clear it!'
             });
-            setCartItems([]);
-            setSelectedOrders([]);
+
+            if (result.isConfirmed) {
+                const response = await fetch("http://localhost:5003/api/cart/clear", {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to clear cart');
+                }
+
+                setCartItems([]);
+                setSelectedItems([]);
+                
+                Swal.fire({
+                    title: 'Cleared!',
+                    text: 'Your cart has been cleared.',
+                    icon: 'success',
+                    confirmButtonColor: '#2ecc71',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
         } catch (error) {
             console.error("Error clearing cart:", error);
             Swal.fire({
                 title: 'Error!',
-                text: 'Failed to clear cart.',
+                text: error.message || 'Failed to clear cart. Please try again.',
                 icon: 'error',
                 confirmButtonColor: '#e74c3c'
             });
@@ -186,23 +280,52 @@ function Cart() {
     };
 
     const handleSelectOrder = (id) => {
-        setSelectedOrders(prev => {
-            if (prev.includes(id)) {
-                return prev.filter(orderId => orderId !== id);
-            } else {
-                return [...prev, id];
+        const selectedItem = cartItems.find(item => item._id === id);
+        if (!selectedItem) return;
+
+        const currentRestaurantId = selectedItem.restaurant_id;
+        
+        // If no items are currently selected, set this restaurant as the selected one
+        if (selectedItems.length === 0) {
+            setSelectedRestaurant(currentRestaurantId);
+            setSelectedItems([id]);
+            return;
+        }
+
+        // If this item is already selected, remove it
+        if (selectedItems.includes(id)) {
+            const newSelectedItems = selectedItems.filter(itemId => itemId !== id);
+            setSelectedItems(newSelectedItems);
+            
+            // If no items remain selected, reset the selected restaurant
+            if (newSelectedItems.length === 0) {
+                setSelectedRestaurant(null);
             }
-        });
+            return;
+        }
+
+        // Check if the new item is from the same restaurant
+        if (currentRestaurantId !== selectedRestaurant) {
+            Swal.fire({
+                title: 'Invalid Selection',
+                text: 'You can only select items from the same restaurant in a single order.',
+                icon: 'warning',
+                confirmButtonColor: '#2ecc71'
+            });
+            return;
+        }
+
+        // Add the new item to selected items
+        setSelectedItems([...selectedItems, id]);
     };
 
     const handleCheckout = async () => {
         const token = localStorage.getItem("auth_token");
         if (!token) {
             Swal.fire({
-                title: 'Authentication Required',
-                text: 'Please log in to proceed with checkout.',
+                title: 'Please Login',
+                text: 'You need to be logged in to checkout',
                 icon: 'warning',
-                confirmButtonText: 'Go to Login',
                 showCancelButton: true,
                 cancelButtonText: 'Cancel',
                 confirmButtonColor: '#2ecc71',
@@ -215,10 +338,10 @@ function Cart() {
             return;
         }
     
-        const selectedItems = cartItems.filter(item => selectedOrders.includes(item._id));
+        const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
     
         try {
-            for (const item of selectedItems) {
+            for (const item of selectedCartItems) {
                 const orderData = {
                     itemId: item._id,
                     quantity: item.quantity,
@@ -241,9 +364,9 @@ function Cart() {
                 timerProgressBar: true
             });
 
-            const remainingCartItems = cartItems.filter(item => !selectedOrders.includes(item._id));
+            const remainingCartItems = cartItems.filter(item => !selectedItems.includes(item._id));
             setCartItems(remainingCartItems);
-            setSelectedOrders([]);
+            setSelectedItems([]);
         } catch (error) {
             console.error("Error placing order:", error.response?.data || error.message);
             Swal.fire({
@@ -255,18 +378,38 @@ function Cart() {
         }
     };
 
-    // Calculate totals
+    // Calculate totals with restaurant-based delivery fee
     const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const selectedTotal = cartItems
-        .filter((item) => selectedOrders.includes(item._id))
-        .reduce((total, item) => total + (item.price * item.quantity), 0);
+    const selectedTotal = selectedItems.reduce((total, itemId) => {
+        const item = cartItems.find(i => i._id === itemId);
+        return total + (item ? item.price * item.quantity : 0);
+    }, 0);
 
-    const deliveryFee = selectedOrders.length > 0 ? 200 : 0;
+    // Apply delivery fee only if items are selected and they're from the same restaurant
+    const deliveryFee = selectedItems.length > 0 ? 200 : 0;
     const totalPrice = selectedTotal + deliveryFee;
+
+    // Group cart items by restaurant for display
+    const groupedCartItems = useMemo(() => {
+        console.log('Grouping cart items:', cartItems);
+        return cartItems.reduce((groups, item) => {
+            const restaurantId = item.restaurant_id || 'unknown';
+            const restaurantName = item.restaurant_name || 'Unknown Restaurant';
+            
+            if (!groups[restaurantId]) {
+                groups[restaurantId] = {
+                    restaurantName: restaurantName,
+                    items: []
+                };
+            }
+            groups[restaurantId].items.push(item);
+            return groups;
+        }, {});
+    }, [cartItems]);
 
     // Render PayPal buttons only when SDK is ready and items are selected
     useEffect(() => {
-        if (sdkReady && selectedOrders.length > 0 && window.paypal) {
+        if (sdkReady && selectedItems.length > 0 && window.paypal) {
             try {
                 const paypalContainer = document.getElementById("paypal-button-container");
                 if (paypalContainer) {
@@ -339,9 +482,10 @@ function Cart() {
                 console.error("Error rendering PayPal buttons:", error);
             }
         }
-    }, [sdkReady, selectedOrders, totalPrice]);
+    }, [sdkReady, selectedItems, totalPrice]);
 
     if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="cart-container">
@@ -353,53 +497,64 @@ function Cart() {
                     <button className="clear-cart-button" onClick={clearCart}>
                         Clear Cart
                     </button>
-                    <div className="cart-items">
-                        {cartItems.map((item) => (
-                            <div key={item._id} className="cart-item">
-                                <input
-                                    type="checkbox"
-                                    className="cart-checkbox"
-                                    checked={selectedOrders.includes(item._id)}
-                                    onChange={() => handleSelectOrder(item._id)}
-                                />
-                                <img
-                                    src={item.img.startsWith("http") || item.img.startsWith("/") ? item.img : `/images/${item.img}`}
-                                    alt={item.name}
-                                    className="cart-item-img"
-                                />
-                                <div className="cart-item-details">
-                                    <span className="cart-item-name">{item.name}</span>
-                                    <span className="cart-item-price">
-                                        LKR {item.price.toFixed(2)} × {item.quantity} = LKR {(item.price * item.quantity).toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="quantity-controls">
-                                    <button 
-                                        className="quantity-btn"
-                                        onClick={() => updateQuantity(item._id, -1)}
-                                        aria-label="Decrease quantity"
-                                    >
-                                        -
-                                    </button>
-                                    <span className="quantity">{item.quantity}</span>
-                                    <button 
-                                        className="quantity-btn"
-                                        onClick={() => updateQuantity(item._id, 1)}
-                                        aria-label="Increase quantity"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                                <button
-                                    onClick={() => removeItem(item._id)}
-                                    className="remove-btn"
-                                    aria-label="Remove item"
-                                >
-                                    <DeleteIcon />
-                                </button>
+                    
+                    {Object.entries(groupedCartItems).map(([restaurantId, group]) => (
+                        <div key={restaurantId} className="restaurant-group">
+                            <h3 className="restaurant-name">
+                                {group.restaurantName}
+                            </h3>
+                            <div className="cart-items">
+                                {group.items.map((item) => (
+                                    <div key={item._id} className="cart-item">
+                                        <input
+                                            type="checkbox"
+                                            className="cart-checkbox"
+                                            checked={selectedItems.includes(item._id)}
+                                            onChange={() => handleSelectOrder(item._id)}
+                                            disabled={selectedRestaurant && 
+                                                    item.restaurant_id !== selectedRestaurant && 
+                                                    selectedItems.length > 0}
+                                        />
+                                        <img
+                                            src={item.img || "/placeholder.svg"}
+                                            alt={item.name}
+                                            className="cart-item-img"
+                                        />
+                                        <div className="cart-item-details">
+                                            <span className="cart-item-name">{item.name}</span>
+                                            <span className="cart-item-price">
+                                                LKR {item.price.toFixed(2)} × {item.quantity} = LKR {(item.price * item.quantity).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="quantity-controls">
+                                            <button 
+                                                className="quantity-btn"
+                                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                                aria-label="Decrease quantity"
+                                            >
+                                                -
+                                            </button>
+                                            <span className="quantity">{item.quantity}</span>
+                                            <button 
+                                                className="quantity-btn"
+                                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                                aria-label="Increase quantity"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={() => removeItem(item._id)}
+                                            className="remove-btn"
+                                            aria-label="Remove item"
+                                        >
+                                            <DeleteIcon />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
 
                     <div className="cart-summary">
                         <div className="summary-row">
@@ -407,25 +562,33 @@ function Cart() {
                             <span>LKR {cartTotal.toFixed(2)}</span>
                         </div>
                         <div className="summary-row">
-                            <span>Selected Items ({selectedOrders.length} items)</span>
+                            <span>Selected Items ({selectedItems.length} items)</span>
                             <span>LKR {selectedTotal.toFixed(2)}</span>
                         </div>
-                        <div className="summary-row">
-                            <span>Delivery Fee</span>
-                            <span>LKR {deliveryFee.toFixed(2)}</span>
-                        </div>
+                        {selectedItems.length > 0 && (
+                            <div className="summary-row">
+                                <span>Delivery Fee (per restaurant)</span>
+                                <span>LKR {deliveryFee.toFixed(2)}</span>
+                            </div>
+                        )}
                         <div className="summary-row total">
                             <span>Total to Pay</span>
                             <span>LKR {totalPrice.toFixed(2)}</span>
                         </div>
                     </div>
 
+                    {selectedItems.length > 0 && (
+                        <div className="selected-restaurant-info">
+                            <p>Ordering from: {selectedItems[0].restaurant_name}</p>
+                        </div>
+                    )}
+
                     <button
                         className="checkout-button"
-                        disabled={selectedOrders.length === 0}
+                        disabled={selectedItems.length === 0}
                         onClick={handleCheckout}
                     >
-                        CHECK OUT ({selectedOrders.length} items)
+                        CHECK OUT ({selectedItems.length} items)
                     </button>
 
                     <div id="paypal-button-container"></div>

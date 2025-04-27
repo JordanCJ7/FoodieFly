@@ -15,6 +15,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 
 function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -148,6 +149,16 @@ function Sidebar({ isOpen, onClose }) {
 
               {userRole === "customer" && (
                 <>
+                  <Link 
+                    to="/restaurants" 
+                    className={`sidebar-link ${activeSection === 'restaurants' ? 'active' : ''}`}
+                    onClick={() => handleSectionClick('restaurants')}
+                    onMouseEnter={() => setIsHovered('restaurants')}
+                    onMouseLeave={() => setIsHovered(null)}
+                  >
+                    <RestaurantIcon />
+                    <span>Browse Restaurants</span>
+                  </Link>
                   <Link 
                     to="/orders" 
                     className={`sidebar-link ${activeSection === 'orders' ? 'active' : ''}`}

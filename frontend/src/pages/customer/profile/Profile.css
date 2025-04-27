@@ -89,10 +89,16 @@
   outline: none;
 }
 
-.edit-button {
+.profile-actions {
   position: absolute;
   right: 0;
   top: 0;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.edit-button {
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -110,9 +116,6 @@
 }
 
 .edit-actions {
-  position: absolute;
-  right: 0;
-  top: 0;
   display: flex;
   gap: 1rem;
 }
@@ -148,6 +151,23 @@
 }
 
 .cancel-button:hover {
+  background-color: #d32f2f;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
   background-color: #d32f2f;
 }
 

@@ -259,6 +259,9 @@ function SignUp() {
               onChange={handleChange}
               required
             />
+            {validationErrors.MobileNumber && (
+              <span className="error-message">{validationErrors.MobileNumber}</span>
+            )}
           </div>
           <div className="form-groupS">
             <label className="labelS" htmlFor="Email">
@@ -274,6 +277,9 @@ function SignUp() {
               onChange={handleChange}
               required
             />
+            {validationErrors.Email && (
+              <span className="error-message">{validationErrors.Email}</span>
+            )}
           </div>
           {/* City Dropdown */}
           <div className="form-groupS">

@@ -2,44 +2,73 @@ import { useEffect, useState } from "react"
 import "./Home.css"
 import HomeLandingPageImage from "../../../images/home_landing_img.jpg"
 import { useNavigate } from "react-router-dom"
-
+import Swal from 'sweetalert2';
 
 function Home() {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Track the current page
-  const [totalPages, setTotalPages] = useState(1); // Track the total number of pages
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5004/api/menu-items/home-menu-items?page=${currentPage}&limit=6`
-        );
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-        }
-        const data = await response.json();
-
-        // Validate the data structure
-        if (!Array.isArray(data.data)) {
-          throw new Error("Invalid data format received from the server.");
-        }
-
-        setFoodItems(data.data); // Set the fetched menu items
-        setTotalPages(data.totalPages); // Set the total number of pages
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching menu items:", err.message);
-        setError(err.message || "An unexpected error occurred.");
-        setLoading(false);
+  const fetchMenuItems = async (page, search = "") => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `http://localhost:5004/api/menu-items/home-menu-items?page=${page}&limit=6${search ? `&search=${search}` : ''}`
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
       }
-    };
-    fetchMenuItems();
-  }, [currentPage]); // Re-fetch when the current page changes
+      const data = await response.json();
+
+      if (!Array.isArray(data.data)) {
+        throw new Error("Invalid data format received from the server.");
+      }
+
+      setFoodItems(data.data);
+      setTotalPages(data.totalPages);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching menu items:", err.message);
+      setError(err.message || "An unexpected error occurred.");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMenuItems(currentPage, searchQuery);
+  }, [currentPage, searchQuery]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const searchInput = e.target.querySelector('.search-input-h').value;
+    setSearchQuery(searchInput);
+    setCurrentPage(1); // Reset to first page when searching
+    setIsSearching(true);
+  };
+
+  const handleSearchInputChange = (e) => {
+    if (e.target.value === '') {
+      setSearchQuery('');
+      setIsSearching(false);
+      setCurrentPage(1);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handleFoodCardClick = (item) => {
+    navigate(`/food/${item.id}`);
+  };
 
   if (loading && currentPage === 1) {
     return <div className="loading">Loading...</div>;
@@ -48,18 +77,6 @@ function Home() {
   if (error) {
     return <div className="error">Error: {error}</div>;
   }
-
-  // Handle pagination button clicks
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
-  const handleFoodCardClick = (item) => {
-    console.log('Food item clicked:', item);
-    navigate(`/food/${item.id}`);
-  };
 
   return (
     <div className="customer-home">
@@ -87,21 +104,22 @@ function Home() {
 
         {/* Search Section */}
         <section className="search-section-h">
-          <div className="search-container-h">
+          <form className="search-container-h" onSubmit={handleSearch}>
             <input
               type="text"
               className="search-input-h"
               placeholder="Search for food, restaurants, or cuisines..."
+              onChange={handleSearchInputChange}
             />
-            <button className="search-button-h">Search</button>
-          </div>
+            <button type="submit" className="search-button-h">Search</button>
+          </form>
         </section>
 
         {/* Trending Section */}
         <section className="trending-section">
           <div className="section-header">
             <h2 className="section-title">
-              Tailored to your <span className="highlight">taste</span>
+              {isSearching ? `Search Results for "${searchQuery}"` : 'Tailored to your'} <span className="highlight">taste</span>
             </h2>
           </div>
           <div className="food-grid">
@@ -134,28 +152,32 @@ function Home() {
                 </div>
               ))
             ) : (
-              <div className="no-items">No menu items found.</div>
+              <div className="no-items">
+                {isSearching ? 'No items found matching your search.' : 'No menu items available.'}
+              </div>
             )}
           </div>
 
           {/* Pagination Controls */}
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
+          {foodItems.length > 0 && (
+            <div className="pagination">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </div>

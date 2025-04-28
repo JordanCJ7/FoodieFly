@@ -109,7 +109,7 @@ function Home() {
             <PhoneAndroidIcon fontSize="large" />
           </div>
           <h3>Seamless Mobile Ordering</h3>
-          <p>Customers can order from any device with our responsive platform.</p>
+          <p>Your customers can easily place orders from any device, thanks to our fully responsive platform.</p>
         </div>
         <div className="feature">
           <div className="feature-icon">

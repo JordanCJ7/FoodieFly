@@ -1,6 +1,7 @@
 /* MenuItemList.css */
 .menu-item-list-conteiner {
   background-color: #f0f7f0;
+  background-image: linear-gradient(120deg, #f0f7f0 0%, #ffffff 100%);
   min-height: 100vh;
   padding: 2rem 0;
 }
@@ -18,34 +19,49 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Enhanced heading with animation */
 h1 {
   text-align: center;
   color: #388E3C;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   font-size: 2.5rem;
   font-weight: 600;
   position: relative;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 h1::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
   width: 100px;
   height: 4px;
   background: linear-gradient(to right, #4CAF50, #81C784);
   border-radius: 2px;
+  animation: expandWidth 0.5s ease-out;
 }
 
+@keyframes expandWidth {
+  from { width: 0; }
+  to { width: 100px; }
+}
+
+/* Enhanced search container */
 .search-container {
-  margin-bottom: 30px;
+  margin: 40px 0 30px 0;
   position: relative;
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
   width: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-container:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.15);
 }
 
 .search-container::before {
@@ -57,6 +73,11 @@ h1::after {
   font-size: 16px;
   color: #4CAF50;
   z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.search-container:focus-within::before {
+  color: #388E3C;
 }
 
 .menu-item-list-conteiner .search-container .search-input {
@@ -74,15 +95,32 @@ h1::after {
 .menu-item-list-conteiner .search-container .search-input:focus {
   border: 2px solid #4CAF50 !important;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
-  transform: translateY(-1px);
 }
 
+/* Enhanced table container */
 .table-container {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
   overflow: hidden;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.table-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #4CAF50, #81C784);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.table-container:hover::after {
+  opacity: 1;
 }
 
 .menu-table {
@@ -91,6 +129,7 @@ h1::after {
   border-spacing: 0;
 }
 
+/* Enhanced table headers */
 .menu-table th {
   background-color: #4CAF50;
   padding: 16px 20px;
@@ -101,10 +140,27 @@ h1::after {
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  user-select: none;
 }
 
 .menu-table th:hover {
   background-color: #388E3C;
+}
+
+.menu-table th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(255,255,255,0.2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.menu-table th:hover::after {
+  transform: scaleX(1);
 }
 
 .menu-table th .sort-icon {
@@ -115,15 +171,17 @@ h1::after {
   transition: transform 0.3s ease;
 }
 
+/* Enhanced table rows */
 .menu-table td {
   padding: 16px 20px;
   border-bottom: 1px solid #e0e8e0;
   vertical-align: middle;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .menu-table tr {
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .menu-table tr:hover {
@@ -131,58 +189,79 @@ h1::after {
   transform: translateX(4px);
 }
 
+.menu-table tr:hover td:first-child {
+  position: relative;
+}
+
+.menu-table tr:hover td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #4CAF50;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* Enhanced menu image */
 .menu-image {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .menu-image:hover {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(2deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced status badges */
+.available, .unavailable {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  max-width: 100px;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
 .available {
   color: #388E3C;
-  font-weight: 600;
   background-color: rgba(76, 175, 80, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  line-height: 1.2;
-  max-width: 100px;
-  justify-content: center;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.available:hover {
+  background-color: rgba(76, 175, 80, 0.15);
+  transform: translateY(-1px);
 }
 
 .unavailable {
   color: #e74c3c;
-  font-weight: 600;
   background-color: rgba(231, 76, 60, 0.1);
-  padding: 4px 12px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  line-height: 1.2;
-  max-width: 100px;
-  justify-content: center;
+  border: 1px solid rgba(231, 76, 60, 0.2);
 }
 
-.no-results {
-  text-align: center;
-  padding: 40px;
-  color: #4CAF50;
-  font-size: 1.2rem;
-  background: rgba(76, 175, 80, 0.05);
+.unavailable:hover {
+  background-color: rgba(231, 76, 60, 0.15);
+  transform: translateY(-1px);
 }
 
-/* Action Icons */
+/* Enhanced action icons */
 .action-icon {
   cursor: pointer;
   font-size: 24px;
@@ -193,6 +272,26 @@ h1::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.action-icon:hover::before {
+  width: 120%;
+  height: 120%;
 }
 
 .edit-icon {
@@ -208,18 +307,18 @@ h1::after {
 .edit-icon:hover {
   color: #ffffff;
   background-color: #4CAF50;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.05);
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
 .delete-icon:hover {
   color: #ffffff;
   background-color: #e74c3c;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.05);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
 }
 
-/* Loading Animation */
+/* Enhanced loading animation */
 .loading {
   text-align: center;
   padding: 40px;
@@ -239,13 +338,14 @@ h1::after {
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 1s linear infinite;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* Error State */
+/* Enhanced error state */
 .error {
   text-align: center;
   padding: 20px;
@@ -254,6 +354,33 @@ h1::after {
   border-radius: 12px;
   margin: 20px;
   font-weight: 500;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Enhanced no results state */
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #4CAF50;
+  font-size: 1.2rem;
+  background: rgba(76, 175, 80, 0.05);
+  border: 1px dashed rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  margin: 20px 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
 }
 
 /* Responsive Design */

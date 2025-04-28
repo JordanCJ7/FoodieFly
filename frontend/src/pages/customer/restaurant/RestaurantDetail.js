@@ -47,8 +47,8 @@ function RestaurantDetail() {
     if (error) return <div className="error">Error: {error}</div>;
     if (!restaurant) return <div className="not-found">Restaurant not found</div>;
 
-    // Group menu items by category
-    const categories = ['all', ...new Set(menuItems.map(item => item.category))];
+    // Group menu items by category, filter out undefined/null/empty
+    const categories = ['all', ...new Set(menuItems.map(item => item.category).filter(c => typeof c === 'string' && c.trim() !== ''))];
     const filteredItems = activeCategory === 'all' 
         ? menuItems 
         : menuItems.filter(item => item.category === activeCategory);
@@ -83,7 +83,9 @@ function RestaurantDetail() {
                         className={`category-btn ${activeCategory === category ? 'active' : ''}`}
                         onClick={() => setActiveCategory(category)}
                     >
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                        {typeof category === 'string' && category.length > 0
+                            ? category.charAt(0).toUpperCase() + category.slice(1)
+                            : 'Unknown'}
                     </button>
                 ))}
             </div>

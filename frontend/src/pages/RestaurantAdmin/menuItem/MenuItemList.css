@@ -42,12 +42,16 @@ h1::after {
 .search-container {
   margin-bottom: 30px;
   position: relative;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
+  width: 100%;
 }
 
 .search-container::before {
   content: '🔍';
   position: absolute;
-  left: 15px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 16px;
@@ -57,21 +61,19 @@ h1::after {
 
 .menu-item-list-conteiner .search-container .search-input {
   width: 100%;
-  padding: 15px 15px 15px 45px;
+  padding: 15px 15px 15px 50px;
   font-size: 16px;
-  border: 2px solid #4CAF50 !important;
-  border-radius: 12px;
+  border: 2px solid transparent !important;
+  border-radius: 16px;
   box-sizing: border-box;
   background-color: #ffffff;
   transition: all 0.3s ease;
   outline: none !important;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
 }
 
 .menu-item-list-conteiner .search-container .search-input:focus {
-  outline: none !important;
   border: 2px solid #4CAF50 !important;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
   transform: translateY(-1px);
 }
 

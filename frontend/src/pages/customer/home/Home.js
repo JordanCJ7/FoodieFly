@@ -28,27 +28,30 @@ function Home() {
       );
       
       if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Server responded with status: ${response.status}`);
       }
       
       const data = await response.json();
       console.log("Search results:", data); // For debugging
 
-      if (!Array.isArray(data.data)) {
-        throw new Error("Invalid data format received from the server.");
+      if (!data || !Array.isArray(data.data)) {
+        throw new Error("Invalid data format received from the server");
       }
 
       setFoodItems(data.data);
       setTotalPages(data.totalPages);
     } catch (err) {
-      console.error("Error fetching menu items:", err.message);
+      console.error("Error fetching menu items:", err);
+      const errorMessage = err.message || 'An unexpected error occurred';
+      
       if (retryCount < 2) {
-        // Retry after 2 seconds
+        console.log(`Retrying... Attempt ${retryCount + 1} of 2`);
         setTimeout(() => {
           fetchMenuItems(page, search, retryCount + 1);
         }, 2000);
       } else {
-        setError('Unable to connect to the server. Please check your internet connection and try again.');
+        setError(`Unable to load menu items: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
@@ -60,32 +63,54 @@ function Home() {
   }, [currentPage, searchQuery]);
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    const searchInput = e.target.querySelector('.search-input-h').value.trim();
-    setSearchQuery(searchInput);
-    setCurrentPage(1); // Reset to first page when searching
-    setIsSearching(!!searchInput);
-    fetchMenuItems(1, searchInput);
+    try {
+      e.preventDefault();
+      const searchInput = e.target.querySelector('.search-input-h')?.value?.trim() || '';
+      setSearchQuery(searchInput);
+      setCurrentPage(1); // Reset to first page when searching
+      setIsSearching(!!searchInput);
+      fetchMenuItems(1, searchInput);
+    } catch (err) {
+      console.error('Error handling search:', err);
+      setError('An error occurred while processing your search');
+    }
   };
 
   const handleSearchInputChange = (e) => {
-    const value = e.target.value.trim();
-    if (value === '') {
-      setSearchQuery('');
-      setIsSearching(false);
-      setCurrentPage(1);
-      fetchMenuItems(1, '');
+    try {
+      const value = e.target.value?.trim() || '';
+      if (value === '') {
+        setSearchQuery('');
+        setIsSearching(false);
+        setCurrentPage(1);
+        fetchMenuItems(1, '');
+      }
+    } catch (err) {
+      console.error('Error handling search input change:', err);
     }
   };
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
+    try {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setCurrentPage(newPage);
+      }
+    } catch (err) {
+      console.error('Error changing page:', err);
+      setError('An error occurred while changing pages');
     }
   };
 
   const handleFoodCardClick = (item) => {
-    navigate(`/food/${item.id}`);
+    try {
+      if (!item?.id) {
+        throw new Error('Invalid food item ID');
+      }
+      navigate(`/food/${item.id}`);
+    } catch (err) {
+      console.error('Error navigating to food item:', err);
+      setError('Unable to navigate to food item details');
+    }
   };
 
   if (loading && currentPage === 1) {

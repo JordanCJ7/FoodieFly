@@ -26,4 +26,7 @@ router.get('/status', verifyToken, getRestaurantStatus);
 // Fetch the restaurant ID for the logged-in user
 router.get('/get-restaurant-id', verifyToken, verifyRole(['restaurantAdmin']), getRestaurantIdForUser);
 
+// Public: Get restaurants list with optional search and cuisine filters
+router.get('/list', require('../controllers/restaurantController').getRestaurantsList);
+
 module.exports = router;

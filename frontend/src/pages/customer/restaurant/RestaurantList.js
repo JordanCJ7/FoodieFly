@@ -27,26 +27,35 @@ function RestaurantList() {
             );
             
             if (!response.ok) {
-                throw new Error(`Server responded with status: ${response.status}`);
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || `Server responded with status: ${response.status}`);
             }
             
             let data = await response.json();
+            
+            // Validate data structure
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid data format received from server');
+            }
+            
             data = sortRestaurants(data);
             setRestaurants(data);
             
-            // Extract unique cuisines
-            const uniqueCuisines = [...new Set(data.map(restaurant => restaurant.cuisine))];
+            // Extract unique cuisines, filter out undefined/null/empty
+            const uniqueCuisines = [...new Set(data.map(restaurant => restaurant.cuisine).filter(c => typeof c === 'string' && c.trim() !== ''))];
             setCuisines(['all', ...uniqueCuisines]);
             
         } catch (err) {
-            console.error('Error:', err);
+            console.error('Error fetching restaurants:', err);
+            const errorMessage = err.message || 'An unexpected error occurred';
+            
             if (retryCount < 2) {
-                // Retry after 2 seconds
+                console.log(`Retrying... Attempt ${retryCount + 1} of 2`);
                 setTimeout(() => {
                     fetchRestaurants(retryCount + 1);
                 }, 2000);
             } else {
-                setError('Unable to connect to the server. Please check your internet connection and try again.');
+                setError(`Unable to load restaurants: ${errorMessage}`);
             }
         } finally {
             setLoading(false);
@@ -75,19 +84,39 @@ function RestaurantList() {
     };
 
     const handleRestaurantClick = (restaurantId) => {
-        navigate(`/restaurant/${restaurantId}`);
+        try {
+            if (!restaurantId) {
+                throw new Error('Invalid restaurant ID');
+            }
+            navigate(`/restaurant/${restaurantId}`);
+        } catch (err) {
+            console.error('Error navigating to restaurant:', err);
+            setError('Unable to navigate to restaurant details');
+        }
     };
 
     const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+        try {
+            setSearchTerm(e.target.value);
+        } catch (err) {
+            console.error('Error updating search term:', err);
+        }
     };
 
     const handleCuisineChange = (e) => {
-        setSelectedCuisine(e.target.value);
+        try {
+            setSelectedCuisine(e.target.value);
+        } catch (err) {
+            console.error('Error updating cuisine filter:', err);
+        }
     };
 
     const handleSortChange = (e) => {
-        setSortBy(e.target.value);
+        try {
+            setSortBy(e.target.value);
+        } catch (err) {
+            console.error('Error updating sort option:', err);
+        }
     };
 
     const handleRetry = () => {
@@ -138,7 +167,11 @@ function RestaurantList() {
                     >
                         {cuisines.map(cuisine => (
                             <option key={cuisine} value={cuisine}>
-                                {cuisine === 'all' ? 'All Cuisines' : cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
+                                {cuisine === 'all'
+                                    ? 'All Cuisines'
+                                    : (typeof cuisine === 'string' && cuisine.length > 0
+                                        ? cuisine.charAt(0).toUpperCase() + cuisine.slice(1)
+                                        : 'Unknown')}
                             </option>
                         ))}
                     </select>

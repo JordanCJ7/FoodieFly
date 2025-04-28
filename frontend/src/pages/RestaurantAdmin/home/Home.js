@@ -116,7 +116,7 @@ function Home() {
             <LocalShippingIcon fontSize="large" />
           </div>
           <h3>Effortless Delivery Management</h3>
-          <p>Track deliveries and manage your delivery fleet efficiently.</p>
+          <p>Monitor deliveries in real-time and optimize your delivery fleet for maximum efficiency.</p>
         </div>
       </div>
       <div className="registration-status">

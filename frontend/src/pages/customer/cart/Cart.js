@@ -84,6 +84,7 @@ function Cart() {
 
             console.log('Processed cart items:', processedItems);
             setCartItems(processedItems);
+            console.log('Cart items after processing:', processedItems);
         } catch (error) {
             console.error("Error fetching cart:", error);
             setError(error.message);
@@ -389,20 +390,18 @@ function Cart() {
     const deliveryFee = selectedItems.length > 0 ? 200 : 0;
     const totalPrice = selectedTotal + deliveryFee;
 
-    // Group cart items by restaurant for display
+    // Group cart items by restaurant
     const groupedCartItems = useMemo(() => {
-        console.log('Grouping cart items:', cartItems);
         return cartItems.reduce((groups, item) => {
-            const restaurantId = item.restaurant_id || 'unknown';
-            const restaurantName = item.restaurant_name || 'Unknown Restaurant';
-            
-            if (!groups[restaurantId]) {
-                groups[restaurantId] = {
-                    restaurantName: restaurantName,
+            // Use restaurant_id if available, otherwise fallback to restaurant_name
+            const restaurantKey = item.restaurant_id || item.restaurant_name || 'unknown';
+            if (!groups[restaurantKey]) {
+                groups[restaurantKey] = {
+                    restaurantName: item.restaurant_name,
                     items: []
                 };
             }
-            groups[restaurantId].items.push(item);
+            groups[restaurantKey].items.push(item);
             return groups;
         }, {});
     }, [cartItems]);

@@ -160,14 +160,14 @@ function Sidebar({ isOpen, onClose }) {
                     <span>Browse Restaurants</span>
                   </Link>
                   <Link 
-                    to="/orders" 
+                    to="/my-orders" 
                     className={`sidebar-link ${activeSection === 'orders' ? 'active' : ''}`}
                     onClick={() => handleSectionClick('orders')}
                     onMouseEnter={() => setIsHovered('orders')}
                     onMouseLeave={() => setIsHovered(null)}
                   >
                     <ListAltIcon />
-                    <span>Orders</span>
+                    <span>My Orders</span>
                   </Link>
                   <Link 
                     to="/cart" 

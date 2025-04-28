@@ -281,13 +281,14 @@ exports.removeMultipleItems = async (req, res) => {
   }
 };
 
+// Export all functions
 module.exports = {
-  addToCart,
-  getUserCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-  removeMultipleItems
+  addToCart: exports.addToCart,
+  getUserCart: exports.getUserCart,
+  removeFromCart: exports.removeFromCart,
+  updateQuantity: exports.updateQuantity,
+  clearCart: exports.clearCart,
+  removeMultipleItems: exports.removeMultipleItems
 };
 
 

@@ -58,10 +58,22 @@ function MyOrders() {
             <p><strong>Status:</strong> <span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></p>
 
             <div className="progress-bar">
-              <div className={`step ${order.status === "Pending" || order.status === "Accepted" || order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>Pending</div>
-              <div className={`step ${order.status === "Accepted" || order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>Accepted</div>
-              <div className={`step ${order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>Preparing</div>
-              <div className={`step ${order.status === "Ready" ? "active" : ""}`}>Ready</div>
+              <div className={`step ${order.status === "Pending" || order.status === "Accepted" || order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>
+                <div className="step-circle"></div>
+                Pending
+              </div>
+              <div className={`step ${order.status === "Accepted" || order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>
+                <div className="step-circle"></div>
+                Accepted
+              </div>
+              <div className={`step ${order.status === "Preparing" || order.status === "Ready" ? "active" : ""}`}>
+                <div className="step-circle"></div>
+                Preparing
+              </div>
+              <div className={`step ${order.status === "Ready" ? "active" : ""}`}>
+                <div className="step-circle"></div>
+                Ready
+              </div>
             </div>
           </div>
         ))

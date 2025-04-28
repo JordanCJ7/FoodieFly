@@ -102,7 +102,7 @@ function Home() {
             <RestaurantIcon fontSize="large" />
           </div>
           <h3>Effortless Setup</h3>
-          <p>Get your restaurant online in minutes with our simple registration process.</p>
+          <p>Bring your restaurant online in just a few minutes with our streamlined registration process.</p>
         </div>
         <div className="feature">
           <div className="feature-icon">

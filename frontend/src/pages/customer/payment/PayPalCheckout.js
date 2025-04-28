@@ -62,6 +62,33 @@ function PayPalCheckout() {
               const purchaseUnit = details.purchase_units[0];
               localStorage.setItem('order_id', details.id);
               
+              const token = localStorage.getItem('auth_token');
+              if (!token) {
+                throw new Error('Authentication token not found');
+              }
+
+              // Create orders in the order service
+              const createdOrders = [];
+              for (const item of selectedCartItems) {
+                const orderData = {
+                  itemId: item._id,
+                  quantity: item.quantity,
+                  totalPrice: item.price * item.quantity
+                };
+
+                try {
+                  const orderResponse = await axios.post(
+                    "http://localhost:5003/api/order/add",
+                    orderData,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  createdOrders.push(orderResponse.data);
+                } catch (error) {
+                  console.error('Error creating order:', error);
+                  throw new Error('Failed to create order');
+                }
+              }
+
               // Save payment details
               await axios.post('http://localhost:5010/api/payment/paypalDetails', {
                 orderId: details.id,
@@ -71,7 +98,7 @@ function PayPalCheckout() {
                 paymentDetails: details,
               }, {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                  Authorization: `Bearer ${token}`,
                 },
               });
 
@@ -81,7 +108,7 @@ function PayPalCheckout() {
                   itemIds: selectedItems
                 }, {
                   headers: {
-                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                    Authorization: `Bearer ${token}`,
                   },
                 });
               } catch (error) {
@@ -94,24 +121,27 @@ function PayPalCheckout() {
                 icon: 'success',
                 confirmButtonColor: '#2ecc71',
               }).then(() => {
-                // Navigate to order tracking page
+                // Navigate to order tracking page with the created orders
                 navigate('/my-orders', { 
                   state: { 
                     orderId: details.id,
-                    success: true 
+                    success: true,
+                    orders: createdOrders
                   } 
                 });
               });
             } catch (error) {
+              console.error('Payment/Order Error:', error);
               Swal.fire({
-                title: 'Payment Error',
-                text: 'There was an error processing your payment.',
+                title: 'Error',
+                text: error.message || 'There was an error processing your payment/order.',
                 icon: 'error',
                 confirmButtonColor: '#e74c3c',
               });
             }
           },
           onError: (err) => {
+            console.error('PayPal Error:', err);
             Swal.fire({
               title: 'Payment Error',
               text: 'There was an error with PayPal. Please try again.',

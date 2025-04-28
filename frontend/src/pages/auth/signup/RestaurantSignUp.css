@@ -65,7 +65,7 @@
   }
   
   .step.active .step-number {
-    background-color: #f4a405;
+    background-color: #4CAF50;
     color: #fff;
   }
   
@@ -129,9 +129,9 @@
   input:focus,
   select:focus,
   textarea:focus {
-    border-color: #f4a405;
+    border-color: #4CAF50;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
   }
   
   .operating-hours {
@@ -210,7 +210,7 @@
   }
   
   input:checked + .toggle-slider {
-    background-color: #f4a405;
+    background-color: #4CAF50;
   }
   
   input:checked + .toggle-slider:before {
@@ -288,22 +288,22 @@
   
   .next-btn,
   .submit-btn {
-    background-color: #f4a405;
+    background-color: #4CAF50;
     color: white;
     border: none;
   }
   
   .next-btn:hover,
   .submit-btn:hover {
-    background-color: #f4a405;
+    background-color: #45a049;
   }
   
   .submit-btn {
-    background-color: #f4a405;
+    background-color: #4CAF50;
   }
   
   .submit-btn:hover {
-    background-color: #e09400;
+    background-color: #45a049;
   }
   
   @keyframes fadeIn {

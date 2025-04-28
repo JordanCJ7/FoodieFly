@@ -229,7 +229,9 @@ function Cart() {
                     icon: 'success',
                     confirmButtonColor: '#2ecc71',
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
                 });
             }
         } catch (error) {
@@ -240,7 +242,11 @@ function Cart() {
                 title: 'Error!',
                 text: error.response?.data?.error || 'Failed to update quantity. Please try again.',
                 icon: 'error',
-                confirmButtonColor: '#e74c3c'
+                confirmButtonColor: '#e74c3c',
+                position: 'top-end',
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false
             });
 
             // Refresh cart items to ensure consistency

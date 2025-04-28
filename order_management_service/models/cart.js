@@ -9,7 +9,9 @@ const cartSchema = new Schema({
       name: String,
       price: Number,
       quantity: { type: Number, default: 1 },
-      img: String // <-- Add this if you use it
+      img: String,
+      restaurant_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' },
+      restaurant_name: String
     }
   ]
 }, { timestamps: true });

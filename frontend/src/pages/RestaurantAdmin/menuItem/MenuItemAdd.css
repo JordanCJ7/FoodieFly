@@ -6,17 +6,48 @@
   max-width: 1200px;
   margin: 50px auto;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item-add-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4caf50, #81c784, #4caf50);
+  background-size: 200% 100%;
+  animation: gradient-shift 8s linear infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .menu-item-add-container:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(76, 175, 80, 0.15);
+  box-shadow: 0 6px 28px rgba(76, 175, 80, 0.15);
 }
 
 .menu-item-add-header {
   margin-bottom: 40px;
   position: relative;
   text-align: center;
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .menu-item-add-header::after {
@@ -29,6 +60,11 @@
   height: 4px;
   background: linear-gradient(90deg, #4caf50, #81c784);
   border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.menu-item-add-header:hover::after {
+  width: 120px;
 }
 
 .menu-item-add-header h2 {
@@ -48,6 +84,12 @@
 
 .menu-item-form {
   width: 100%;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .form-layout {
@@ -75,6 +117,11 @@
 .form-groupM {
   margin-bottom: 28px;
   position: relative;
+  transition: transform 0.3s ease;
+}
+
+.form-groupM:focus-within {
+  transform: translateY(-2px);
 }
 
 .labelM, 
@@ -85,6 +132,12 @@ label {
   color: #2e7d32;
   font-size: 0.95rem;
   letter-spacing: 0.3px;
+  transition: color 0.3s ease;
+}
+
+.form-groupM:focus-within label {
+  color: #4caf50;
+  transform: translateX(4px);
 }
 
 .form-rowM {
@@ -115,6 +168,7 @@ select {
   transition: all 0.3s ease;
   background-color: #ffffff;
   color: #2e7d32;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.05);
 }
 
 input[type="text"]:hover,
@@ -123,6 +177,7 @@ textarea:hover,
 select:hover {
   border-color: #a5d6a7;
   background-color: #fafffe;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.08);
 }
 
 input[type="text"]:focus,
@@ -132,6 +187,7 @@ select:focus {
   border-color: #4caf50;
   outline: none;
   box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+  background-color: #fff;
 }
 
 /* Add specific styles for the input with class inputM */
@@ -157,6 +213,18 @@ select:focus {
 
 .checkbox-group {
   margin-top: 25px;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .checkbox-container {
@@ -173,6 +241,7 @@ select:focus {
 
 .checkbox-container:hover {
   color: #1b5e20;
+  transform: translateX(4px);
 }
 
 .checkbox-container input {
@@ -198,31 +267,35 @@ select:focus {
 .checkbox-container:hover input ~ .checkmark {
   background-color: #e8f5e9 !important;
   border-color: #4caf50 !important;
+  transform: scale(1.05);
 }
 
 .checkbox-container input:checked ~ .checkmark {
   background-color: #4caf50 !important;
   border-color: #4caf50 !important;
+  transform: scale(1);
 }
 
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
+  animation: checkmark 0.2s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(45deg);
+    opacity: 1;
+  }
 }
 
 .checkbox-container input:checked ~ .checkmark:after {
   display: block;
-}
-
-.checkbox-container .checkmark:after {
-  left: 6px;
-  top: 2px;
-  width: 4px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
 }
 
 .image-upload-container {
@@ -231,12 +304,20 @@ select:focus {
   border-radius: 16px;
   padding: 24px;
   transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 .image-upload-container:hover {
   border-color: #4caf50;
   box-shadow: 0 4px 20px rgba(76, 175, 80, 0.12);
   transform: translateY(-2px);
+  animation: none;
 }
 
 .image-preview {
@@ -254,13 +335,36 @@ select:focus {
   background-repeat: no-repeat;
   transition: all 0.3s ease;
   overflow: hidden;
+  position: relative;
 }
 
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
+.image-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(76, 175, 80, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-preview:hover::before {
+  opacity: 1;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #4caf50;
+  transition: transform 0.3s ease;
+}
+
+.image-upload-container:hover .upload-placeholder {
+  transform: scale(1.05);
 }
 
 .file-input {
@@ -285,7 +389,44 @@ select:focus {
   width: auto;
   min-width: 160px;
   margin: 0 auto;
-  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-input-label::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.file-input-label:hover::after {
+  animation: shine 1.5s ease-in-out;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+    opacity: 0;
+  }
 }
 
 .file-input-label:hover {
@@ -309,6 +450,7 @@ select:focus {
   margin-top: 40px;
   padding-top: 30px;
   border-top: 2px solid #e8f5e9;
+  animation: slideUp 0.6s ease-out;
 }
 
 .btn-submit {
@@ -322,6 +464,30 @@ select:focus {
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.btn-submit:hover::after {
+  animation: shine 1.5s ease-in-out;
 }
 
 .btn-submit:hover {
@@ -366,14 +532,14 @@ select:focus {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .menu-item-add-container {
-    padding: 30px 20px;
+    padding: 24px 20px;
     margin: 20px;
     border-radius: 16px;
   }
 
   .form-layout {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 24px;
   }
 
   .menu-item-add-header h2 {
@@ -396,6 +562,25 @@ select:focus {
 
   .image-preview {
     height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-item-add-container {
+    padding: 20px 16px;
+    margin: 16px;
+  }
+
+  .menu-item-add-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-groupM {
+    margin-bottom: 20px;
+  }
+
+  .image-preview {
+    height: 160px;
   }
 }
 

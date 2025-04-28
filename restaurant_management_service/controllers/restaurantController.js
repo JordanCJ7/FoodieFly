@@ -108,3 +108,25 @@ exports.getRestaurantIdForUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Public: Get restaurants list with optional search and cuisine filters
+exports.getRestaurantsList = async (req, res) => {
+  try {
+    const { search = '', cuisine = '' } = req.query;
+    let query = {};
+    if (search) {
+      query.$or = [
+        { restaurantName: { $regex: search, $options: 'i' } },
+        { cuisine: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (cuisine && cuisine !== 'all') {
+      query.cuisine = cuisine;
+    }
+    const restaurants = await Restaurant.find(query);
+    res.status(200).json(restaurants);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

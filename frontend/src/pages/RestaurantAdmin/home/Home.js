@@ -108,7 +108,7 @@ function Home() {
           <div className="feature-icon">
             <PhoneAndroidIcon fontSize="large" />
           </div>
-          <h3>Mobile Ordering</h3>
+          <h3>Seamless Mobile Ordering</h3>
           <p>Customers can order from any device with our responsive platform.</p>
         </div>
         <div className="feature">

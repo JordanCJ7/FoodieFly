@@ -80,7 +80,9 @@ function Home() {
       <div className="hero-section-RA">
         <h1>FoodieFly - Food Ordering & Delivery System</h1>
         <p className="subtitle-RA">
-          Register your restaurant, manage your menu, and start receiving orders online today.
+          Launch your restaurant,<br/>
+          curate your menu and start accepting online orders,<br/>
+          seamlessly all in one place, today!
         </p>
         <div className="cta-buttons-RA">
           <button className="primary-button-RA" onClick={handleButtonClick}>

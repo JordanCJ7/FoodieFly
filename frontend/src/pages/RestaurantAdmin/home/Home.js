@@ -147,21 +147,6 @@ function Home() {
           )}
         </div>
       </div>
-      <div className="admin-section">
-        <h2>Restaurant Admin</h2>
-        <p>Manage your restaurant profile and menu items from one place.</p>
-        <div className="admin-buttons">
-          <button className="admin-button" onClick={handleButtonClick}>
-            Register Your Restaurant
-          </button>
-          <button className="admin-button" onClick={handleMenuButtonClick}>
-            Add Menu Items
-          </button>
-          <button className="admin-button" onClick={handleViewMenuButtonClick}>
-            View My Menus
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

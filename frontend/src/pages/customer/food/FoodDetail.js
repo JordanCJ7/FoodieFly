@@ -35,7 +35,7 @@ function FoodDetail() {
           ...item,
           _id: item._id || item.id, // Ensure we have _id
           restaurant_id: item.restaurant?._id || item.restaurant_id || item.restaurantId,
-          restaurant_name: item.restaurant?.name || item.restaurant_name || item.restaurantName || item.restaurant,
+          restaurant_name: item.restaurant || item.restaurant_name || item.restaurantName,
           image: item.image || item.img,
           price: parseFloat(item.price) // Ensure price is a number
         };

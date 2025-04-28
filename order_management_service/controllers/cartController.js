@@ -129,7 +129,9 @@ exports.getUserCart = async (req, res) => {
         price: parseFloat(item.price || 0),
         quantity: parseInt(item.quantity || 1),
         img: item.img || '',
-        totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1)
+        totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1),
+        restaurant_id: item.restaurant_id ? item.restaurant_id.toString() : '',
+        restaurant_name: item.restaurant_name || 'Unknown Restaurant'
       };
     });
 

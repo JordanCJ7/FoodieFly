@@ -9,6 +9,7 @@ function FoodDetail() {
   const [foodItem, setFoodItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchFoodItem = async () => {
@@ -21,16 +22,30 @@ function FoodDetail() {
         const data = await response.json();
         
         // Find the specific item in the response
-        const item = data.data.find(item => item.id === id);
+        const item = data.data.find(item => item.id === id || item._id === id);
         
         if (!item) {
           throw new Error('Food item not found');
         }
+
+        console.log('Found food item:', item); // Debug log
         
-        setFoodItem(item);
-        setLoading(false);
+        // Add restaurant information to the food item
+        const itemWithRestaurant = {
+          ...item,
+          _id: item._id || item.id, // Ensure we have _id
+          restaurant_id: item.restaurant?._id || item.restaurant_id || item.restaurantId,
+          restaurant_name: item.restaurant?.name || item.restaurant_name || item.restaurantName || item.restaurant,
+          image: item.image || item.img,
+          price: parseFloat(item.price) // Ensure price is a number
+        };
+
+        console.log('Processed food item:', itemWithRestaurant); // Debug log
+        setFoodItem(itemWithRestaurant);
       } catch (err) {
+        console.error('Error fetching food item:', err);
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -39,14 +54,19 @@ function FoodDetail() {
   }, [id]);
 
   const handleAddToCart = async () => {
-    const token = localStorage.getItem('auth_token');
+    if (!foodItem) {
+      console.error('No food item data available');
+      return;
+    }
+
+    const token = localStorage.getItem("auth_token");
     if (!token) {
       Swal.fire({
-        title: 'Authentication Required',
-        text: 'Please log in to add items to cart',
+        title: 'Please Login',
+        text: 'You need to be logged in to add items to cart',
         icon: 'warning',
-        confirmButtonText: 'Go to Login',
         showCancelButton: true,
+        confirmButtonText: 'Go to Login',
         cancelButtonText: 'Cancel',
         confirmButtonColor: '#2ecc71',
         cancelButtonColor: '#e74c3c'
@@ -59,39 +79,54 @@ function FoodDetail() {
     }
 
     try {
-      const response = await fetch('http://localhost:5003/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          itemId: foodItem._id || foodItem.id,
-          name: foodItem.name,
-          price: foodItem.price,
-          img: foodItem.image
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to add to cart');
+      // Ensure we have a valid _id
+      if (!foodItem._id) {
+        throw new Error('Invalid food item ID');
       }
 
-      const data = await response.json();
-      Swal.fire({
-        title: 'Success!',
-        text: 'Item added to cart successfully!',
-        icon: 'success',
-        confirmButtonColor: '#2ecc71',
-        timer: 2000,
-        timerProgressBar: true
+      const cartItem = {
+        itemId: foodItem._id,
+        name: foodItem.name,
+        price: parseFloat(foodItem.price), // Ensure price is a number
+        quantity: parseInt(quantity), // Ensure quantity is a number
+        img: foodItem.image || foodItem.img,
+        restaurant_id: foodItem.restaurant_id,
+        restaurant_name: foodItem.restaurant_name
+      };
+
+      console.log('Adding to cart:', cartItem); // Debug log
+
+      const response = await fetch("http://localhost:5003/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(cartItem),
       });
-    } catch (err) {
-      console.error('Error adding to cart:', err);
+
+      const data = await response.json();
+      console.log('Server response:', data); // Debug log
+
+      if (response.ok) {
+        Swal.fire({
+          title: 'Success!',
+          text: 'Item added to cart successfully!',
+          icon: 'success',
+          confirmButtonColor: '#2ecc71',
+          timer: 2000,
+          timerProgressBar: true
+        }).then(() => {
+          navigate("/cart");
+        });
+      } else {
+        throw new Error(data.error || 'Failed to add item to cart');
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
       Swal.fire({
         title: 'Error!',
-        text: err.message || 'Failed to add item to cart. Please try again.',
+        text: error.message || 'Failed to add item to cart. Please try again.',
         icon: 'error',
         confirmButtonColor: '#e74c3c'
       });
@@ -120,6 +155,10 @@ function FoodDetail() {
     navigate('/cart');
   };
 
+  const handleQuantityChange = (change) => {
+    setQuantity(prev => Math.max(1, prev + change));
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -140,11 +179,28 @@ function FoodDetail() {
         </div>
         <div className="food-detail-info">
           <h1 className="food-detail-title">{foodItem.name}</h1>
-          <p className="food-detail-restaurant">{foodItem.restaurant || "Unknown Restaurant"}</p>
+          <p className="food-detail-restaurant">{foodItem.restaurant_name}</p>
           <p className="food-detail-price">Rs.{(foodItem.price || 0).toFixed(2)}</p>
           <div className="food-detail-description">
             <h2>Description</h2>
             <p>{foodItem.description || "No description available."}</p>
+          </div>
+          <div className="quantity-controls">
+            <button 
+              className="quantity-btn"
+              onClick={() => handleQuantityChange(-1)}
+              aria-label="Decrease quantity"
+            >
+              -
+            </button>
+            <span className="quantity">{quantity}</span>
+            <button 
+              className="quantity-btn"
+              onClick={() => handleQuantityChange(1)}
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
           </div>
           <div className="food-detail-actions">
             <button className="add-to-cart-button" onClick={handleAddToCart}>Add to Cart</button>

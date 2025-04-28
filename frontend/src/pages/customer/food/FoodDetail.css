@@ -1,7 +1,7 @@
 .food-detail-container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
 .food-detail-content {
@@ -122,6 +122,44 @@
 
 .error {
   color: #ff4444;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.quantity-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.quantity-btn:hover {
+  background-color: #27ae60;
+}
+
+.quantity-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.quantity {
+  font-size: 1.2rem;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

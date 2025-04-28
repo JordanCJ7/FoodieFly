@@ -52,6 +52,34 @@ a {
     color: var(--primary-dark);
   }
   
+  /* Center Navigation */
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+  }
+  
+  .nav-link:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+  }
+  
+  .nav-link svg {
+    font-size: 1.25rem;
+  }
+  
   /* Search Bar */
   .search-container {
     display: none;

@@ -3,10 +3,11 @@ const router = express.Router();
 const cartController = require("../controllers/cartController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
-router.post("/add", verifyToken, cartController.addToCart);
+router.post("/", verifyToken, cartController.addToCart);
 router.get("/", verifyToken, cartController.getUserCart);
 router.delete("/remove/:id", verifyToken, cartController.removeFromCart);
-router.put("/update",verifyToken, cartController.updateQuantity);
+router.patch("/update/:id", verifyToken, cartController.updateQuantity);
+router.delete("/clear", verifyToken, cartController.clearCart);
 
 module.exports = router;
  

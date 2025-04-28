@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react"
 import "./Home.css"
 import HomeLandingPageImage from "../../../images/home_landing_img.jpg"
-import { useNavigate } from "react-router-dom"
-import Swal from 'sweetalert2';
+import { useNavigate, Link } from "react-router-dom"
 
 function Home() {
   const [foodItems, setFoodItems] = useState([]);
@@ -14,16 +13,22 @@ function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
-  const fetchMenuItems = async (page, search = "") => {
+  const fetchMenuItems = async (page, search = "", retryCount = 0) => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch(
-        `http://localhost:5004/api/menu-items/home-menu-items?page=${page}&limit=6${search ? `&search=${encodeURIComponent(search)}` : ''}`
+        `http://localhost:5004/api/menu-items/home-menu-items?page=${page}&limit=6${search ? `&search=${encodeURIComponent(search)}` : ''}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+        throw new Error(`Server responded with status: ${response.status}`);
       }
       
       const data = await response.json();
@@ -35,10 +40,17 @@ function Home() {
 
       setFoodItems(data.data);
       setTotalPages(data.totalPages);
-      setLoading(false);
     } catch (err) {
       console.error("Error fetching menu items:", err.message);
-      setError(err.message || "An unexpected error occurred.");
+      if (retryCount < 2) {
+        // Retry after 2 seconds
+        setTimeout(() => {
+          fetchMenuItems(page, search, retryCount + 1);
+        }, 2000);
+      } else {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -77,11 +89,26 @@ function Home() {
   };
 
   if (loading && currentPage === 1) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <p>Loading menu items...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>;
+    return (
+      <div className="error-container">
+        <div className="error-message">
+          <h2>Oops! Something went wrong</h2>
+          <p>{error}</p>
+          <button className="retry-button" onClick={() => fetchMenuItems(currentPage, searchQuery, 0)}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -99,13 +126,24 @@ function Home() {
               Order your favorite meals from the best local restaurants and enjoy doorstep delivery
               in 30 minutes or less. Fresh, delicious food is just a few clicks away.
             </p>
-            <button className="order-button-c">
-              Order Now <span className="arrow"></span>
-            </button>
+            <Link to="/restaurants" className="order-button-c">
+              Browse Restaurants <span className="arrow"></span>
+            </Link>
           </div>
           <div className="hero-image-c">
             <img src={HomeLandingPageImage || "/placeholder.svg"} alt="Delicious food" />
           </div>
+        </section>
+
+        {/* Featured Restaurants Section */}
+        <section className="featured-section">
+          <div className="section-header">
+            <h2>Popular Restaurants</h2>
+            <Link to="/restaurants" className="view-all-link">
+              View All <span className="arrow">→</span>
+            </Link>
+          </div>
+          {/* Rest of the existing content */}
         </section>
 
         {/* Search Section */}

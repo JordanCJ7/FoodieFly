@@ -25,6 +25,8 @@ import DeliveryStatus from "./pages/deliveryPersonnel/status/DeliveryStatus";
 import DeliveryRequestStatus from "./pages/RestaurantAdmin/status/DeliveryRequestStatus";
 import FoodDetail from "./pages/customer/food/FoodDetail";
 import Notifications from "./pages/customer/notifications/Notifications";
+import RestaurantList from "./pages/customer/restaurant/RestaurantList";
+import RestaurantDetail from "./pages/customer/restaurant/RestaurantDetail";
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/food/:id" element={<FoodDetail />} />
       <Route path="/notifications" element={<Notifications />} />
+      <Route path="/restaurants" element={<RestaurantList />} />
+      <Route path="/restaurant/:id" element={<RestaurantDetail />} />
 
     {/* delivery related routes */}
     <Route path="/deliveries/deliveryDetails" element={<DeliveryDetails/>}/>

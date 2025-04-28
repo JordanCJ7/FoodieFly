@@ -210,6 +210,7 @@ function MenuItemAdd() {
                   name="availability"
                   checked={formData.availability}
                   onChange={handleChange}
+                  style={{ accentColor: '#4caf50' }}
                 />
                 <span className="checkmark"></span>
                 <span>Available for ordering</span>

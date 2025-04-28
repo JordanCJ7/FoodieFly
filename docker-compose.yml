@@ -14,6 +14,8 @@ services:
       - "5001:5001" # Expose the service on port 5001
     depends_on:
       - mongo # Ensure MongoDB starts before this service
+    environment:
+      - MONGO_URL=mongodb+srv://janithasuranjana2001:12345@cluster0.hcen9st.mongodb.net/foodOrderDeliverydb?retryWrites=true&w=majority&appName=ClusterDSProject
 
   restaurant-management:
     build: ./restaurant_management_service # Build the restaurant-management service
@@ -21,6 +23,8 @@ services:
       - "5004:5004" # Expose the service on port 5004
     depends_on:
       - mongo # Ensure MongoDB starts before this service
+    environment:
+      - MONGO_URL=mongodb+srv://janithasuranjana2001:12345@cluster0.hcen9st.mongodb.net/foodOrderDeliverydb?retryWrites=true&w=majority&appName=ClusterDSProject
 
   order-management:
     build: ./order_management_service # Build the order-management service
@@ -28,6 +32,8 @@ services:
       - "5003:5003" # Expose the service on port 5003
     depends_on:
       - mongo # Ensure MongoDB starts before this service
+    environment:
+      - MONGO_URL=mongodb+srv://janithasuranjana2001:12345@cluster0.hcen9st.mongodb.net/foodOrderDeliverydb?retryWrites=true&w=majority&appName=ClusterDSProject
 
   delivery-management:
     build: ./delivery_management_service # Build the delivery-management service
@@ -35,6 +41,8 @@ services:
       - "5008:5008" # Expose the service on port 5008
     depends_on:
       - mongo # Ensure MongoDB starts before this service
+    environment:
+      - MONGO_URL=mongodb+srv://janithasuranjana2001:12345@cluster0.hcen9st.mongodb.net/foodOrderDeliverydb?retryWrites=true&w=majority&appName=ClusterDSProject
 
   payment-service:
     build: ./payment_service # Build the payment-service
@@ -42,6 +50,8 @@ services:
       - "5010:5010" # Expose the service on port 5010
     depends_on:
       - mongo # Ensure MongoDB starts before this service
+    environment:
+      - MONGO_URL=mongodb+srv://janithasuranjana2001:12345@cluster0.hcen9st.mongodb.net/foodOrderDeliverydb?retryWrites=true&w=majority&appName=ClusterDSProject  
 
   frontend:
     build: ./frontend # Build the frontend service

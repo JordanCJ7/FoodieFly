@@ -115,7 +115,7 @@ function Home() {
           <div className="feature-icon">
             <LocalShippingIcon fontSize="large" />
           </div>
-          <h3>Delivery Management</h3>
+          <h3>Effortless Delivery Management</h3>
           <p>Track deliveries and manage your delivery fleet efficiently.</p>
         </div>
       </div>

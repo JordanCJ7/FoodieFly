@@ -80,7 +80,9 @@ function Home() {
       <div className="hero-section-RA">
         <h1>FoodieFly - Food Ordering & Delivery System</h1>
         <p className="subtitle-RA">
-          Register your restaurant, manage your menu, and start receiving orders online today.
+          Launch your restaurant,<br/>
+          curate your menu and start accepting online orders,<br/>
+          seamlessly all in one place, today!
         </p>
         <div className="cta-buttons-RA">
           <button className="primary-button-RA" onClick={handleButtonClick}>
@@ -90,7 +92,7 @@ function Home() {
             Add Menu Items
           </button>
           <button className="secondary-button-RA" onClick={handleViewMenuButtonClick}>
-            View my Menus
+            View your Menus
           </button>
         </div>
       </div>
@@ -99,22 +101,22 @@ function Home() {
           <div className="feature-icon">
             <RestaurantIcon fontSize="large" />
           </div>
-          <h3>Easy Registration</h3>
-          <p>Get your restaurant online in minutes with our simple registration process.</p>
+          <h3>Quick & Easy Setup</h3>
+          <p>Bring your restaurant online in just a few minutes with our streamlined registration process.</p>
         </div>
         <div className="feature">
           <div className="feature-icon">
             <PhoneAndroidIcon fontSize="large" />
           </div>
-          <h3>Mobile Ordering</h3>
-          <p>Customers can order from any device with our responsive platform.</p>
+          <h3>Seamless Mobile Ordering</h3>
+          <p>Your customers can easily place orders from any device, thanks to our fully responsive platform.</p>
         </div>
         <div className="feature">
           <div className="feature-icon">
             <LocalShippingIcon fontSize="large" />
           </div>
-          <h3>Delivery Management</h3>
-          <p>Track deliveries and manage your delivery fleet efficiently.</p>
+          <h3>Effortless Delivery Management</h3>
+          <p>Monitor deliveries in real-time and optimize your delivery fleet for maximum efficiency.</p>
         </div>
       </div>
       <div className="registration-status">

@@ -19,14 +19,38 @@ h1 {
   margin-bottom: 20px;
 }
 
-.search-input {
+.menu-item-list-conteiner .search-container .search-input {
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #4CAF50;
+  border: 1px solid #4CAF50 !important;
   border-radius: 4px;
   box-sizing: border-box;
   background-color: #ffffff;
+  transition: all 0.3s ease;
+  outline: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.menu-item-list-conteiner .search-container .search-input:focus {
+  outline: none !important;
+  border: 2px solid #4CAF50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2) !important;
+}
+
+.menu-item-list-conteiner .search-container .search-input:focus-visible {
+  outline: none !important;
+}
+
+.menu-item-list-conteiner .search-container .search-input:-webkit-autofill,
+.menu-item-list-conteiner .search-container .search-input:-webkit-autofill:hover,
+.menu-item-list-conteiner .search-container .search-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: inherit;
+  border: 2px solid #4CAF50 !important;
 }
 
 .table-container {

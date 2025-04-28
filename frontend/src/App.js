@@ -27,6 +27,7 @@ import FoodDetail from "./pages/customer/food/FoodDetail";
 import Notifications from "./pages/customer/notifications/Notifications";
 import RestaurantList from "./pages/customer/restaurant/RestaurantList";
 import RestaurantDetail from "./pages/customer/restaurant/RestaurantDetail";
+import PayPalCheckout from "./pages/customer/payment/PayPalCheckout";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/restaurants" element={<RestaurantList />} />
       <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+      <Route path="/payment/paypal" element={<PayPalCheckout />} />
 
     {/* delivery related routes */}
     <Route path="/deliveries/deliveryDetails" element={<DeliveryDetails/>}/>

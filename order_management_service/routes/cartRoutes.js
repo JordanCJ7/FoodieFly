@@ -8,6 +8,7 @@ router.get("/", verifyToken, cartController.getUserCart);
 router.delete("/remove/:id", verifyToken, cartController.removeFromCart);
 router.patch("/update/:id", verifyToken, cartController.updateQuantity);
 router.delete("/clear", verifyToken, cartController.clearCart);
+router.post("/remove-multiple", verifyToken, cartController.removeMultipleItems);
 
 module.exports = router;
  

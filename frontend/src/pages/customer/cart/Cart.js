@@ -114,7 +114,7 @@ function Cart() {
                     const {data: clientId} = await axios.get("http://localhost:5010/api/config/paypal");
                     const script = document.createElement("script");
                     script.type = "text/javascript";
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons&enable-funding=venmo,card`;
                     script.async = true;
                     script.onload = () => {
                         setSdkReady(true);
@@ -406,83 +406,6 @@ function Cart() {
         }, {});
     }, [cartItems]);
 
-    // Render PayPal buttons only when SDK is ready and items are selected
-    useEffect(() => {
-        if (sdkReady && selectedItems.length > 0 && window.paypal) {
-            try {
-                const paypalContainer = document.getElementById("paypal-button-container");
-                if (paypalContainer) {
-                    paypalContainer.innerHTML = "";
-                    
-                    window.paypal.Buttons({
-                        createOrder: (data, actions) => {
-                            return actions.order.create({
-                                purchase_units: [
-                                    {
-                                        amount: {
-                                            value: totalPrice.toFixed(2),
-                                            currency_code: "USD",
-                                        },
-                                    },
-                                ],
-                            });
-                        },
-                        onApprove: async (data, actions) => {
-                            try {
-                                const details = await actions.order.capture();
-                                const payer = details.payer;
-                                const purchaseUnit = details.purchase_units[0];
-
-                                localStorage.setItem("order_id", details.id);
-
-                                await axios.post("http://localhost:5010/api/payment/paypalDetails",
-                                    {
-                                        orderId: details.id,
-                                        payerName: `${payer.name.given_name} ${payer.name.surname}`,
-                                        amount: parseFloat(purchaseUnit.amount.value),
-                                        currency: purchaseUnit.amount.currency_code,
-                                        paymentDetails: details,
-                                    },
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                                        },
-                                    }
-                                );
-
-                                Swal.fire({
-                                    title: 'Payment Successful!',
-                                    text: `Thank you for your purchase, ${payer.name.given_name}!`,
-                                    icon: 'success',
-                                    confirmButtonColor: '#2ecc71'
-                                });
-                            } catch (error) {
-                                console.error("Payment processing error:", error);
-                                Swal.fire({
-                                    title: 'Payment Error',
-                                    text: 'There was an error processing your payment.',
-                                    icon: 'error',
-                                    confirmButtonColor: '#e74c3c'
-                                });
-                            }
-                        },
-                        onError: (err) => {
-                            console.error("PayPal Payment Error:", err);
-                            Swal.fire({
-                                title: 'Payment Error',
-                                text: 'There was an error with PayPal. Please try again.',
-                                icon: 'error',
-                                confirmButtonColor: '#e74c3c'
-                            });
-                        },
-                    }).render("#paypal-button-container");
-                }
-            } catch (error) {
-                console.error("Error rendering PayPal buttons:", error);
-            }
-        }
-    }, [sdkReady, selectedItems, totalPrice]);
-
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -585,12 +508,10 @@ function Cart() {
                     <button
                         className="checkout-button"
                         disabled={selectedItems.length === 0}
-                        onClick={handleCheckout}
+                        onClick={() => navigate('/payment/paypal', { state: { selectedItems, cartItems } })}
                     >
                         CHECK OUT ({selectedItems.length} items)
                     </button>
-
-                    <div id="paypal-button-container"></div>
                 </>
             )}
         </div>

@@ -248,4 +248,46 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
+// Remove multiple items from cart
+exports.removeMultipleItems = async (req, res) => {
+  const { itemIds } = req.body;
+  const userId = req.user?.id || req.user?._id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "User ID not found in token" });
+  }
+
+  if (!Array.isArray(itemIds) || itemIds.length === 0) {
+    return res.status(400).json({ error: "Invalid or empty itemIds array" });
+  }
+
+  try {
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(404).json({ error: "Cart not found" });
+    }
+
+    // Remove all items with matching IDs
+    cart.items = cart.items.filter(item => !itemIds.includes(item._id.toString()));
+    await cart.save();
+
+    res.status(200).json({ message: "Items removed successfully", cart });
+  } catch (err) {
+    console.error("Error removing multiple items:", err);
+    res.status(500).json({ 
+      error: "Failed to remove items",
+      details: err.message
+    });
+  }
+};
+
+module.exports = {
+  addToCart,
+  getUserCart,
+  removeFromCart,
+  updateQuantity,
+  clearCart,
+  removeMultipleItems
+};
+
 

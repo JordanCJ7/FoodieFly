@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./RestaurantSignUp.css";
+import Swal from 'sweetalert2';
 
 const RestaurantSignUp = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -121,7 +122,6 @@ const RestaurantSignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
       const transformedData = {
         userId,
         OwnerName: formData.OwnerName,
@@ -138,7 +138,12 @@ const RestaurantSignUp = () => {
 
       const token = localStorage.getItem("auth_token");
       if (!token) {
-        alert("Authentication token is missing. Please log in again.");
+        Swal.fire({
+          title: 'Authentication Error',
+          text: 'Authentication token is missing. Please log in again.',
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
         navigate("/login");
         return;
       }
@@ -154,27 +159,53 @@ const RestaurantSignUp = () => {
         }
       );
 
-      console.log("Backend response:", response); // Log the full response
-      console.log("Backend response data:", response.data); // Log the response data
+      console.log("Backend response:", response);
+      console.log("Backend response data:", response.data);
 
       if (response.status === 201) {
-        alert("Restaurant registered successfully!");
+        await Swal.fire({
+          title: 'Success!',
+          text: 'Restaurant registered successfully!',
+          icon: 'success',
+          confirmButtonColor: '#4CAF50',
+          timer: 2000,
+          showConfirmButton: false
+        });
         console.log("Navigating to addMenuItem page...");
-        navigate("/addMenuItem"); // Navigate to the next page
+        navigate("/addMenuItem");
       } else {
-        alert("Unexpected response from the server. Please try again.");
+        Swal.fire({
+          title: 'Error',
+          text: 'Unexpected response from the server. Please try again.',
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
       }
     } catch (error) {
       console.error("Error during restaurant registration:", error);
       if (error.response) {
-        console.log("Backend error response:", error.response); // Log the full error response
-        const errorMessage =
-          error.response.data?.error || "An unexpected error occurred.";
-        alert(`Backend Error: ${errorMessage}`);
+        console.log("Backend error response:", error.response);
+        const errorMessage = error.response.data?.error || "An unexpected error occurred.";
+        Swal.fire({
+          title: 'Registration Failed',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
       } else if (error.request) {
-        alert("No response received from the server. Please check your connection.");
+        Swal.fire({
+          title: 'Connection Error',
+          text: 'No response received from the server. Please check your connection.',
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
       } else {
-        alert(`Error: ${error.message}`);
+        Swal.fire({
+          title: 'Error',
+          text: error.message,
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
       }
     }
   };

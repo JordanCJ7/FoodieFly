@@ -8,6 +8,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
+import Swal from 'sweetalert2';
 
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -56,18 +57,45 @@ function Header() {
   // Function to handle sign-out
   const handleSignOut = async () => {
     try {
-      // Send a POST request to the backend to log out
-      await axios.post(
-        "http://localhost:5001/api/auth/logout", // Backend logout endpoint
-        {},
-        { withCredentials: true } // Include credentials (cookies)
-      );
-      // Clear any frontend-stored tokens
-      localStorage.removeItem("auth_token");
-      // Redirect the user to the login page
-      navigate("/login");
+      const result = await Swal.fire({
+        title: 'Sign Out',
+        text: 'Are you sure you want to sign out?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, sign out',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (result.isConfirmed) {
+        // Send a POST request to the backend to log out
+        await axios.post(
+          "http://localhost:5001/api/auth/logout",
+          {},
+          { withCredentials: true }
+        );
+        // Clear any frontend-stored tokens
+        localStorage.removeItem("auth_token");
+        // Show success message
+        await Swal.fire({
+          title: 'Signed Out!',
+          text: 'You have been successfully signed out.',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        // Redirect the user to the login page
+        navigate("/login");
+      }
     } catch (err) {
       console.error("Error during sign-out:", err.response?.data?.error);
+      Swal.fire({
+        title: 'Error',
+        text: 'An error occurred while signing out. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#4CAF50'
+      });
     }
   };
 

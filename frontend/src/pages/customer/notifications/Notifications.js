@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Notifications.css';
+import Swal from 'sweetalert2';
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -9,12 +10,23 @@ function Notifications() {
     const fetchNotifications = async () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        alert('Please log in to view notifications');
+        Swal.fire({
+          title: 'Authentication Required',
+          text: 'Please log in to view notifications',
+          icon: 'warning',
+          confirmButtonColor: '#4CAF50',
+          showCancelButton: true,
+          confirmButtonText: 'Go to Login',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/login';
+          }
+        });
         return;
       }
 
       try {
-        // This is a placeholder. You'll need to implement the actual notifications API
         const response = await fetch('http://localhost:5003/api/notifications', {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -23,10 +35,21 @@ function Notifications() {
           const data = await response.json();
           setNotifications(data);
         } else {
-          console.error('Failed to fetch notifications');
+          Swal.fire({
+            title: 'Error',
+            text: 'Failed to fetch notifications',
+            icon: 'error',
+            confirmButtonColor: '#4CAF50'
+          });
         }
       } catch (err) {
         console.error('Error fetching notifications:', err);
+        Swal.fire({
+          title: 'Error',
+          text: 'An error occurred while fetching notifications',
+          icon: 'error',
+          confirmButtonColor: '#4CAF50'
+        });
       } finally {
         setLoading(false);
       }

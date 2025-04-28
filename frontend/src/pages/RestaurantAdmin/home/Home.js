@@ -80,7 +80,7 @@ function Home() {
       <div className="hero-section-RA">
         <h1>FoodieFly - Food Ordering & Delivery System</h1>
         <p className="subtitle-RA">
-          Launch your restaurant,<br/>
+          Launch your restaurant,
           curate your menu and start accepting online orders,<br/>
           seamlessly all in one place, today!
         </p>

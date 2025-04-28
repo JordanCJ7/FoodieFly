@@ -146,18 +146,30 @@ h1::after {
   color: #388E3C;
   font-weight: 600;
   background-color: rgba(76, 175, 80, 0.1);
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: 20px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  max-width: 100px;
+  justify-content: center;
 }
 
 .unavailable {
   color: #e74c3c;
   font-weight: 600;
   background-color: rgba(231, 76, 60, 0.1);
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: 20px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  max-width: 100px;
+  justify-content: center;
 }
 
 .no-results {

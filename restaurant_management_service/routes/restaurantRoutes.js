@@ -29,4 +29,7 @@ router.get('/get-restaurant-id', verifyToken, verifyRole(['restaurantAdmin']), g
 // Public: Get restaurants list with optional search and cuisine filters
 router.get('/list', require('../controllers/restaurantController').getRestaurantsList);
 
+// Public: Get a single restaurant by ID
+router.get('/:id', require('../controllers/restaurantController').getRestaurantById);
+
 module.exports = router;

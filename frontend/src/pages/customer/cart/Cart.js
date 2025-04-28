@@ -319,16 +319,7 @@ function Cart() {
         const selectedItem = cartItems.find(item => item._id === id);
         if (!selectedItem) return;
 
-        const currentRestaurantId = selectedItem.restaurant_id;
-        
-        // If no items are currently selected, set this restaurant as the selected one
-        if (selectedItems.length === 0) {
-            setSelectedRestaurant(currentRestaurantId);
-            setSelectedItems([id]);
-            return;
-        }
-
-        // If this item is already selected, remove it
+        // If this item is already selected, unselect it
         if (selectedItems.includes(id)) {
             const newSelectedItems = selectedItems.filter(itemId => itemId !== id);
             setSelectedItems(newSelectedItems);
@@ -340,8 +331,16 @@ function Cart() {
             return;
         }
 
-        // Check if the new item is from the same restaurant
-        if (currentRestaurantId !== selectedRestaurant) {
+        // If selecting first item, set the restaurant
+        if (selectedItems.length === 0) {
+            setSelectedRestaurant(selectedItem.restaurant_name); // Using restaurant_name as ID
+            setSelectedItems([id]);
+            return;
+        }
+
+        // Check if item is from the same restaurant
+        const firstSelectedItem = cartItems.find(item => item._id === selectedItems[0]);
+        if (firstSelectedItem.restaurant_name !== selectedItem.restaurant_name) {
             Swal.fire({
                 title: 'Invalid Selection',
                 text: 'You can only select items from the same restaurant in a single order.',
@@ -351,7 +350,7 @@ function Cart() {
             return;
         }
 
-        // Add the new item to selected items
+        // Add the item to selection
         setSelectedItems([...selectedItems, id]);
     };
 
@@ -428,8 +427,7 @@ function Cart() {
     // Group cart items by restaurant
     const groupedCartItems = useMemo(() => {
         return cartItems.reduce((groups, item) => {
-            // Use restaurant_id if available, otherwise fallback to restaurant_name
-            const restaurantKey = item.restaurant_id || item.restaurant_name || 'unknown';
+            const restaurantKey = item.restaurant_name || 'unknown';
             if (!groups[restaurantKey]) {
                 groups[restaurantKey] = {
                     restaurantName: item.restaurant_name,
@@ -455,10 +453,15 @@ function Cart() {
                         Clear Cart
                     </button>
                     
-                    {Object.entries(groupedCartItems).map(([restaurantId, group]) => (
-                        <div key={restaurantId} className="restaurant-group">
+                    {Object.entries(groupedCartItems).map(([restaurantName, group]) => (
+                        <div key={restaurantName} className="restaurant-group">
                             <h3 className="restaurant-name">
-                                {group.restaurantName}
+                                {restaurantName}
+                                {selectedRestaurant && selectedRestaurant !== restaurantName && (
+                                    <span style={{ color: 'red', fontSize: '0.8em', marginLeft: '10px' }}>
+                                        (Cannot select items from multiple restaurants)
+                                    </span>
+                                )}
                             </h3>
                             <div className="cart-items">
                                 {group.items.map((item) => (
@@ -468,14 +471,18 @@ function Cart() {
                                             className="cart-checkbox"
                                             checked={selectedItems.includes(item._id)}
                                             onChange={() => handleSelectOrder(item._id)}
-                                            disabled={selectedRestaurant && 
-                                                    item.restaurant_id !== selectedRestaurant && 
-                                                    selectedItems.length > 0}
+                                            disabled={selectedRestaurant && selectedRestaurant !== item.restaurant_name}
+                                            style={{
+                                                cursor: selectedRestaurant && selectedRestaurant !== item.restaurant_name ? 'not-allowed' : 'pointer'
+                                            }}
                                         />
                                         <img
                                             src={item.img || "/placeholder.svg"}
                                             alt={item.name}
                                             className="cart-item-img"
+                                            style={{
+                                                opacity: selectedRestaurant && selectedRestaurant !== item.restaurant_name ? 0.5 : 1
+                                            }}
                                         />
                                         <div className="cart-item-details">
                                             <span className="cart-item-name">{item.name}</span>
@@ -536,14 +543,45 @@ function Cart() {
 
                     {selectedItems.length > 0 && (
                         <div className="selected-restaurant-info">
-                            <p>Ordering from: {selectedItems[0].restaurant_name}</p>
+                            <p>Ordering from: {cartItems.find(item => item._id === selectedItems[0])?.restaurant_name}</p>
                         </div>
                     )}
 
                     <button
                         className="checkout-button"
                         disabled={selectedItems.length === 0}
-                        onClick={() => navigate('/payment/paypal', { state: { selectedItems, cartItems } })}
+                        onClick={() => {
+                            // Get the selected cart items
+                            const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
+                            
+                            // Get the restaurant ID of the first selected item
+                            const firstRestaurantId = selectedCartItems[0]?.restaurant_id;
+                            
+                            // Check if all items are from the same restaurant
+                            const hasMultipleRestaurants = selectedCartItems.some(
+                                item => item.restaurant_id !== firstRestaurantId
+                            );
+
+                            if (hasMultipleRestaurants) {
+                                Swal.fire({
+                                    title: 'Invalid Selection',
+                                    text: 'You can only checkout items from the same restaurant in a single order.',
+                                    icon: 'warning',
+                                    confirmButtonColor: '#2ecc71'
+                                });
+                                return;
+                            }
+
+                            // If we get here, all items are from the same restaurant
+                            navigate('/payment/paypal', { 
+                                state: { 
+                                    selectedItems,
+                                    selectedCartItems,
+                                    cartItems,
+                                    totalAmount: totalPrice
+                                } 
+                            });
+                        }}
                     >
                         CHECK OUT ({selectedItems.length} items)
                     </button>

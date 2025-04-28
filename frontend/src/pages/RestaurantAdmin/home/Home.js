@@ -92,7 +92,7 @@ function Home() {
             Add Menu Items
           </button>
           <button className="secondary-button-RA" onClick={handleViewMenuButtonClick}>
-            View my Menus
+            View your Menus
           </button>
         </div>
       </div>

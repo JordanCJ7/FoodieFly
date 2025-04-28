@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import axios from "axios";
 import "./MenuItemAdd.css";
+import Swal from 'sweetalert2';
 
 function MenuItemAdd() {
   // State to manage form data
@@ -25,7 +26,12 @@ function MenuItemAdd() {
       try {
         const token = localStorage.getItem("auth_token");
         if (!token) {
-          alert("Authentication token is missing. Please log in again.");
+          Swal.fire({
+            title: 'Authentication Error',
+            text: 'Authentication token is missing. Please log in again.',
+            icon: 'error',
+            confirmButtonColor: '#4CAF50'
+          });
           return;
         }
   
@@ -130,7 +136,14 @@ function MenuItemAdd() {
         image: null,
       });
   
-      alert("Menu item added successfully!");
+      await Swal.fire({
+        title: 'Success!',
+        text: 'Menu item added successfully!',
+        icon: 'success',
+        confirmButtonColor: '#4CAF50',
+        timer: 2000,
+        showConfirmButton: false
+      });
       navigate("/menu-item-list");
     } catch (err) {
       console.error("Error adding menu item:", err.response?.data?.error || err.message);

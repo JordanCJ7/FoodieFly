@@ -61,6 +61,8 @@ function PayPalCheckout() {
               const payer = details.payer;
               const purchaseUnit = details.purchase_units[0];
               localStorage.setItem('order_id', details.id);
+              
+              // Save payment details
               await axios.post('http://localhost:5010/api/payment/paypalDetails', {
                 orderId: details.id,
                 payerName: `${payer.name.given_name} ${payer.name.surname}`,
@@ -72,12 +74,34 @@ function PayPalCheckout() {
                   Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
                 },
               });
+
+              // Remove paid items from cart
+              try {
+                await axios.post('http://localhost:5003/api/cart/remove-multiple', {
+                  itemIds: selectedItems
+                }, {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                  },
+                });
+              } catch (error) {
+                console.error('Error removing items from cart:', error);
+              }
+
               Swal.fire({
                 title: 'Payment Successful!',
                 text: `Thank you for your purchase, ${payer.name.given_name}!`,
                 icon: 'success',
                 confirmButtonColor: '#2ecc71',
-              }).then(() => navigate('/customer/orders'));
+              }).then(() => {
+                // Navigate to order tracking page
+                navigate('/my-orders', { 
+                  state: { 
+                    orderId: details.id,
+                    success: true 
+                  } 
+                });
+              });
             } catch (error) {
               Swal.fire({
                 title: 'Payment Error',

@@ -183,33 +183,68 @@ function Cart() {
 
         try {
             const token = localStorage.getItem("auth_token");
-            const response = await fetch(`http://localhost:5003/api/cart/${itemId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ quantity: newQuantity }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to update quantity");
+            if (!token) {
+                Swal.fire({
+                    title: 'Please Login',
+                    text: 'You need to be logged in to update cart',
+                    icon: 'warning',
+                    confirmButtonColor: '#2ecc71'
+                });
+                return;
             }
 
-            setCartItems(prevItems =>
-                prevItems.map(item =>
-                    item._id === itemId
-                        ? {
-                            ...item,
-                            quantity: newQuantity,
-                            totalPrice: item.price * newQuantity
-                        }
-                        : item
-                )
+            // Using axios for the request with the correct endpoint and payload
+            const response = await axios.patch(
+                `http://localhost:5003/api/cart/update/${itemId}`,
+                { 
+                    itemId: itemId,
+                    quantity: newQuantity 
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
             );
+
+            // Update the cart items in state if the request was successful
+            if (response.data) {
+                setCartItems(prevItems =>
+                    prevItems.map(item =>
+                        item._id === itemId
+                            ? {
+                                ...item,
+                                quantity: newQuantity,
+                                totalPrice: item.price * newQuantity
+                            }
+                            : item
+                    )
+                );
+
+                // Show success message
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Quantity updated successfully',
+                    icon: 'success',
+                    confirmButtonColor: '#2ecc71',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
         } catch (error) {
-            console.error("Error updating quantity:", error);
-            alert("Failed to update quantity. Please try again.");
+            console.error("Error updating quantity:", error.response?.data || error.message);
+            
+            // Show error message with more details
+            Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.error || 'Failed to update quantity. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
+
+            // Refresh cart items to ensure consistency
+            fetchCartItems();
         }
     };
 

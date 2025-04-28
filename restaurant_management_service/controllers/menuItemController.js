@@ -274,3 +274,14 @@ exports.getHomeMenuItems = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch menu items' });
   }
 };
+
+// Public: Get all menu items for a given restaurant ID
+exports.getMenuItemsByRestaurant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const menuItems = await MenuItem.find({ restaurantId: id });
+    res.status(200).json({ data: menuItems });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

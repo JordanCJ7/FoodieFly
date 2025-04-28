@@ -130,3 +130,17 @@ exports.getRestaurantsList = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Public: Get a single restaurant by ID
+exports.getRestaurantById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findById(id);
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+    res.status(200).json(restaurant);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

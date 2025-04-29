@@ -62,6 +62,30 @@ function MyOrders() {
     }
   };
 
+  const handleOrderConfirmation = async (orderId, action) => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setError("Please log in to confirm/reject orders.");
+      return;
+    }
+
+    try {
+      const endpoint = action === 'confirm' 
+        ? `http://localhost:5003/api/order/complete/${orderId}`
+        : `http://localhost:5003/api/order/cancel/${orderId}`;
+      
+      await axios.post(endpoint, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Refresh orders after confirmation/rejection
+      fetchOrders();
+    } catch (err) {
+      console.error(`Error ${action}ing order:`, err);
+      setError(`Error ${action}ing order: ` + (err.response?.data?.error || err.message));
+    }
+  };
+
   if (loading) return <div className="orders-container">Loading your orders...</div>;
   if (error) return <div className="orders-container">{error}</div>;
 
@@ -103,17 +127,21 @@ function MyOrders() {
             <p><strong>Status:</strong> <span className={`status ${(order.status || 'pending').toLowerCase()}`}>{order.status || 'Pending'}</span></p>
 
             <div className="progress-bar">
-              {['Pending', 'Accepted', 'Preparing', 'Ready'].map((status, index, array) => (
-                <div
-                  key={status}
-                  className={`step ${
-                    array.slice(0, array.indexOf(order.status || 'Pending') + 1).includes(status) ? 'active' : ''
-                  }`}
-                >
-                  <div className="step-circle"></div>
-                  {status}
-                </div>
-              ))}
+              {['Pending', 'Accepted', 'Preparing', 'Ready', 'In Delivery', 'Delivered', 'Completed'].map((status, index, array) => {
+                const orderStatus = order.status || 'Pending';
+                const orderStatusIndex = array.indexOf(orderStatus);
+                const currentStepIndex = array.indexOf(status);
+                
+                return (
+                  <div
+                    key={status}
+                    className={`step ${currentStepIndex <= orderStatusIndex ? 'active' : ''}`}
+                  >
+                    <div className="step-circle"></div>
+                    {status}
+                  </div>
+                );
+              })}
             </div>
 
             {(order.status || 'Pending').toLowerCase() === 'pending' && (
@@ -123,6 +151,23 @@ function MyOrders() {
               >
                 Cancel Order
               </button>
+            )}
+
+            {(order.status || '').toLowerCase() === 'delivered' && (
+              <div className="delivery-confirmation-buttons">
+                <button
+                  className="confirm-order-button"
+                  onClick={() => handleOrderConfirmation(order._id, 'confirm')}
+                >
+                  Confirm Delivery
+                </button>
+                <button
+                  className="reject-order-button"
+                  onClick={() => handleOrderConfirmation(order._id, 'reject')}
+                >
+                  Reject Delivery
+                </button>
+              </div>
             )}
           </div>
         ))

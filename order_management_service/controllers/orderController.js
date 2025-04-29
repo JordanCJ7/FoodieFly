@@ -17,6 +17,13 @@ exports.placeOrder = async (req, res) => {
             });
         }
 
+        // Validate restaurant ID
+        if (!restaurantId && (!items[0]?.restaurant_id && !items[0]?.restaurantId)) {
+            return res.status(400).json({ 
+                error: "Restaurant ID is required" 
+            });
+        }
+
         const customerId = req.user?.id;
         if (!customerId) {
             return res.status(401).json({ error: "Unauthorized - No customer ID" });
@@ -25,14 +32,14 @@ exports.placeOrder = async (req, res) => {
         // Create new order with multiple items
         const order = new Order({
             customerId,
-            restaurantId: restaurantId || items[0]?.restaurant_id || '',
-            restaurantName: restaurantName || items[0]?.restaurant_name || 'Unknown Restaurant',
+            restaurantId: restaurantId || items[0]?.restaurant_id || items[0]?.restaurantId,
+            restaurantName: restaurantName || items[0]?.restaurant_name || items[0]?.restaurantName || 'Unknown Restaurant',
             items: items.map(item => ({
                 itemId: item.itemId,
                 quantity: item.quantity,
                 price: item.price,
                 name: item.name,
-                restaurant_id: item.restaurant_id || ''
+                restaurant_id: item.restaurant_id || item.restaurantId
             })),
             totalAmount: totalAmount || items.reduce((total, item) => total + (item.price * item.quantity), 0),
             deliveryFee: deliveryFee || 200,
@@ -236,6 +243,40 @@ exports.getReadyOrders = async (req, res) => {
   }
 };
 
+// Get all orders in Accepted state for a delivery person
+exports.getAcceptedOrders = async (req, res) => {
+  try {
+    console.log('Fetching accepted and in-delivery orders...');
+    
+    // Fetch orders that are in Accepted or In Delivery state
+    const orders = await Order.find({ 
+      status: { $in: ['Accepted', 'In Delivery'] }
+    })
+    .lean()
+    .sort({ updatedAt: -1 }); // Most recent first
+    
+    console.log(`Found ${orders.length} orders`);
+    
+    // Transform the response to include simplified customer details
+    const transformedOrders = orders.map(order => ({
+      ...order,
+      customerId: {
+        first_name: 'Customer',
+        last_name: `#${order.customerId.toString().slice(-4)}` // Last 4 chars of customer ID
+      }
+    }));
+    
+    res.json(transformedOrders);
+  } catch (error) {
+    console.error("Error in getAcceptedOrders:", error);
+    res.status(500).json({ 
+      error: "Error fetching accepted orders",
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
 module.exports = {
   placeOrder: exports.placeOrder,
   getOrder: exports.getOrder,
@@ -245,6 +286,7 @@ module.exports = {
   getOrdersForCustomer: exports.getOrdersForCustomer,
   updateOrder: exports.updateOrder,
   getRestaurantOrderHistory: exports.getRestaurantOrderHistory,
-  getReadyOrders: exports.getReadyOrders
+  getReadyOrders: exports.getReadyOrders,
+  getAcceptedOrders: exports.getAcceptedOrders
 };
 

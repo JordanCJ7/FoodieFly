@@ -178,15 +178,13 @@ exports.clearCart = async (req, res) => {
 };
 
 // Update quantity
-// Update item quantity in the cart
 exports.updateQuantity = async (req, res) => {
-  const { itemId, quantity } = req.body; // Receive item ID and the quantity to update
-  console.log(req.user);
+  const { itemId, quantity } = req.body;
   const userId = req.user?.id || req.user?._id;
-if (!userId) {
-  return res.status(401).json({ error: "Unauthorized: User ID missing" });
-}
 
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized: User ID missing" });
+  }
 
   if (quantity <= 0) {
     return res.status(400).json({ error: "Quantity must be greater than 0" });
@@ -199,7 +197,11 @@ if (!userId) {
       return res.status(404).json({ error: "Cart not found" });
     }
 
-    const item = cart.items.find(item => item._id.toString() === itemId);
+    // Try to find the item by either _id or itemId
+    const item = cart.items.find(item => 
+      item._id.toString() === itemId || 
+      item.itemId.toString() === itemId
+    );
 
     if (!item) {
       return res.status(404).json({ error: "Item not found in cart" });
@@ -215,8 +217,6 @@ if (!userId) {
     res.status(500).json({ error: "Failed to update quantity" });
   }
 };
-
-
 
 // Delete item
 // Remove item from user's cart

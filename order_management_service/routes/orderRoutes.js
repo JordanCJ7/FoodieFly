@@ -1,10 +1,11 @@
 const express = require('express');
-const { placeOrder, getOrder, getOrdersForRestaurant, updateOrderStatus, cancelOrder, getOrdersForCustomer, updateOrder, getRestaurantOrderHistory, getReadyOrders } = require('../controllers/orderController');
+const { placeOrder, getOrder, getOrdersForRestaurant, updateOrderStatus, cancelOrder, getOrdersForCustomer, updateOrder, getRestaurantOrderHistory, getReadyOrders, getAcceptedOrders } = require('../controllers/orderController');
 const { verifyToken, verifyRole } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // Delivery Personnel Routes
 router.get('/ready', verifyToken, verifyRole(['deliveryPersonnel']), getReadyOrders);
+router.get('/accepted', verifyToken, verifyRole(['deliveryPersonnel']), getAcceptedOrders);
 
 // Customer Order Routes
 router.post('/add',verifyToken,verifyRole(['customer']), placeOrder);//checked

@@ -85,19 +85,19 @@ function Cart() {
                 console.log('Processing item:', item);
                 return {
                     _id: item._id || item.itemId,
+                    itemId: item._id || item.itemId,
                     name: item.name || 'Unknown Item',
                     price: parseFloat(item.price || 0),
                     quantity: parseInt(item.quantity || 1),
                     img: item.img || item.image || '/placeholder-food-image.jpg',
                     totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1),
                     restaurant_id: item.restaurant_id || item.restaurant?._id || '',
-                    restaurant_name: item.restaurant_name || item.restaurant || 'Unknown Restaurant'
+                    restaurant_name: item.restaurant_name || item.restaurant?.name || 'Unknown Restaurant'
                 };
             });
 
             console.log('Processed cart items:', processedItems);
             setCartItems(processedItems);
-            console.log('Cart items after processing:', processedItems);
         } catch (error) {
             console.error("Error fetching cart:", error);
             setError(error.message);
@@ -431,9 +431,20 @@ function Cart() {
             })),
             totalAmount: totalAmount,
             deliveryFee: deliveryFee,
-            restaurantId: selectedCartItems[0]?.restaurant_id || '',
-            restaurantName: selectedCartItems[0]?.restaurant_name || 'Unknown Restaurant'
+            restaurantId: selectedCartItems[0]?.restaurant_id || selectedCartItems[0]?.restaurantId || '',
+            restaurantName: selectedCartItems[0]?.restaurant_name || selectedCartItems[0]?.restaurantName || 'Unknown Restaurant'
         };
+
+        // Validate restaurant ID
+        if (!orderData.restaurantId) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Unable to process order: Restaurant information is missing',
+                icon: 'error',
+                confirmButtonColor: '#e74c3c'
+            });
+            return;
+        }
 
         console.log('Order data being sent to payment with restaurant info:', orderData);
 

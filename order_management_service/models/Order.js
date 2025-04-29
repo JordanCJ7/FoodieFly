@@ -20,7 +20,7 @@ const orderSchema = new Schema(
         deliveryFee: { type: Number, required: true, default: 200 },
         status: {
             type: String,
-            enum: ['Pending', 'Accepted', 'Preparing', 'Ready', 'Delivered', 'Cancelled'],
+            enum: ['Pending', 'Accepted', 'Preparing', 'Ready', 'In Delivery', 'Delivered', 'Completed', 'Cancelled'],
             default: 'Pending'
         },
         paypalOrderId: { type: String },

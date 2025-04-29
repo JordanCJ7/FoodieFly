@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./Cart.css";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,6 +13,7 @@ function Cart() {
     const [sdkReady, setSdkReady] = useState(false);
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handlePaymentDetailsClick = () => {
         navigate("/payment-details");
@@ -22,6 +23,18 @@ function Cart() {
         console.log('Cart component mounted, fetching items...');
         fetchCartItems();
     }, []);
+
+    // Add a new useEffect to handle cart refresh after payment
+    useEffect(() => {
+        // Check if we're coming back from a successful payment
+        const { state } = location;
+        if (state?.cartRefreshNeeded) {
+            console.log('Cart refresh needed, fetching items...');
+            fetchCartItems();
+            // Clear the state to prevent unnecessary refreshes
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location, navigate]);
 
     const fetchCartItems = async () => {
         try {

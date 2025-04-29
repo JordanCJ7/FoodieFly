@@ -174,3 +174,38 @@ exports.updateOrder = async (req, res) => {
   }
 };
 
+// Get order history for a specific restaurant (Ready and Cancelled orders)
+exports.getRestaurantOrderHistory = async (req, res) => {
+  try {
+    const { restaurantId } = req.params;
+    
+    // Validate restaurant ID
+    if (!restaurantId) {
+      return res.status(400).json({ error: "Restaurant ID is required" });
+    }
+    
+    // Fetch orders that are either Ready or Cancelled
+    const orders = await Order.find({ 
+      restaurantId,
+      status: { $in: ['Ready', 'Cancelled'] }
+    }).sort({ updatedAt: -1 }); // Sort by most recent first
+    
+    // If no orders found, return an empty array
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching restaurant order history:", error);
+    res.status(500).json({ error: "Error fetching restaurant order history" });
+  }
+};
+
+module.exports = {
+  placeOrder: exports.placeOrder,
+  getOrder: exports.getOrder,
+  getOrdersForRestaurant: exports.getOrdersForRestaurant,
+  updateOrderStatus: exports.updateOrderStatus,
+  cancelOrder: exports.cancelOrder,
+  getOrdersForCustomer: exports.getOrdersForCustomer,
+  updateOrder: exports.updateOrder,
+  getRestaurantOrderHistory: exports.getRestaurantOrderHistory
+};
+

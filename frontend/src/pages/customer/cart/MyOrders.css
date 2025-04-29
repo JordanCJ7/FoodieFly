@@ -447,3 +447,66 @@
     transform: rotate(360deg);
   }
 }
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.orders-header h2 {
+  margin: 0;
+}
+
+.view-order-history,
+.view-active-orders {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.view-order-history:hover,
+.view-active-orders:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Add styles for completed orders */
+.order-card .status.completed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.order-card .status.completed::before {
+  background: #2e7d32;
+}
+
+.order-card .status.cancelled {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.order-card .status.cancelled::before {
+  background: #c62828;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .orders-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .view-order-history,
+  .view-active-orders {
+    width: 100%;
+  }
+}

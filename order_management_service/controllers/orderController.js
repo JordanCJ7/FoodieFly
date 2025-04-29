@@ -3,36 +3,52 @@ const Order = require('../models/Order');
 const Restaurant = require('../../restaurant_management_service/models/Restaurant');
 const MenuItem = require('../../restaurant_management_service/models/MenuItem');
 
- 
 //place a order
 exports.placeOrder = async (req, res) => {
-  try {
-      console.log("Received order data:", req.body); // Debugging
+    try {
+        console.log("Received order data:", req.body); // Debugging
 
-      const {  itemId,quantity, totalPrice } = req.body;
-      if ( !itemId || !quantity || !totalPrice) {
-          return res.status(400).json({ error: "Invalid order data" });
-      }
+        const { items, totalAmount, deliveryFee, restaurantName, paypalOrderId, payerName, paymentStatus } = req.body;
+        
+        // Validate required fields
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ 
+                error: "Invalid order data. Required fields: items (array)" 
+            });
+        }
 
-      const customerId = req.user?.id; // Ensure req.user exists
-      if (!customerId) {
-          return res.status(401).json({ error: "Unauthorized - No customer ID" });
-      }
+        const customerId = req.user?.id;
+        if (!customerId) {
+            return res.status(401).json({ error: "Unauthorized - No customer ID" });
+        }
 
-      const order = new Order({
-          customerId,
-          itemId,
-          quantity,
-          totalPrice,
-          status: "Pending",
-      });
+        // Create new order with multiple items
+        const order = new Order({
+            customerId,
+            restaurantName: restaurantName || items[0]?.restaurant_name || 'Unknown Restaurant',
+            items: items.map(item => ({
+                itemId: item.itemId,
+                quantity: item.quantity,
+                price: item.price,
+                name: item.name
+            })),
+            totalAmount: totalAmount || items.reduce((total, item) => total + (item.price * item.quantity), 0),
+            deliveryFee: deliveryFee || 200,
+            status: "Pending",
+            paypalOrderId,
+            payerName,
+            paymentStatus
+        });
 
-      await order.save();
-      res.status(201).json(order);
-  } catch (error) {
-      console.error("Error placing order:", error); // Log full error
-      res.status(500).json({ error: "Error placing order" });
-  }
+        console.log("Creating order:", JSON.stringify(order, null, 2)); // Debug log
+        await order.save();
+        console.log("Order saved successfully:", JSON.stringify(order, null, 2)); // Debug log
+
+        res.status(201).json(order);
+    } catch (error) {
+        console.error("Error placing order:", error);
+        res.status(500).json({ error: "Error placing order: " + error.message });
+    }
 };
 /*example
 {

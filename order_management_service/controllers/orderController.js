@@ -102,8 +102,11 @@ exports.getOrdersForRestaurant = async (req, res) => {
       return res.status(400).json({ error: "Restaurant ID is required" });
     }
     
-    // Fetch orders associated with this restaurant
-    const orders = await Order.find({ restaurantId });
+    // Fetch orders associated with this restaurant, excluding Ready and Cancelled orders
+    const orders = await Order.find({ 
+      restaurantId,
+      status: { $nin: ['Ready', 'Cancelled'] } // Exclude Ready and Cancelled orders
+    });
     
     // If no orders found, return an empty array
     res.json(orders);

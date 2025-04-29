@@ -248,25 +248,58 @@ exports.removeMultipleItems = async (req, res) => {
   const { itemIds } = req.body;
   const userId = req.user?.id || req.user?._id;
 
+  console.log('Removing multiple items:', { userId, itemIds });
+
   if (!userId) {
+    console.log('No user ID found in token');
     return res.status(401).json({ error: "User ID not found in token" });
   }
 
   if (!Array.isArray(itemIds) || itemIds.length === 0) {
+    console.log('Invalid itemIds:', itemIds);
     return res.status(400).json({ error: "Invalid or empty itemIds array" });
   }
 
   try {
+    console.log('Finding cart for user:', userId);
     const cart = await Cart.findOne({ userId });
+    
     if (!cart) {
+      console.log('No cart found for user:', userId);
       return res.status(404).json({ error: "Cart not found" });
     }
 
-    // Remove all items with matching IDs
-    cart.items = cart.items.filter(item => !itemIds.includes(item._id.toString()));
+    console.log('Current cart items:', cart.items.map(item => ({
+      _id: item._id.toString(),
+      itemId: item.itemId.toString()
+    })));
+    
+    // Convert all IDs to strings for comparison
+    const itemIdsToRemove = itemIds.map(id => id.toString());
+    
+    // Remove items that match either itemId or _id
+    const originalLength = cart.items.length;
+    cart.items = cart.items.filter(item => {
+      const itemIdStr = item.itemId.toString();
+      const idStr = item._id.toString();
+      return !itemIdsToRemove.includes(itemIdStr) && !itemIdsToRemove.includes(idStr);
+    });
+    
+    const removedCount = originalLength - cart.items.length;
+    console.log(`Removed ${removedCount} items from cart`);
+    
     await cart.save();
+    console.log('Cart saved successfully');
+    console.log('Remaining cart items:', cart.items.map(item => ({
+      _id: item._id.toString(),
+      itemId: item.itemId.toString()
+    })));
 
-    res.status(200).json({ message: "Items removed successfully", cart });
+    res.status(200).json({ 
+      message: "Items removed successfully", 
+      removedCount,
+      remainingItems: cart.items.length 
+    });
   } catch (err) {
     console.error("Error removing multiple items:", err);
     res.status(500).json({ 

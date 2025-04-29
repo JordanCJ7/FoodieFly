@@ -452,6 +452,159 @@
   100% { opacity: 0.6; transform: scale(0.95); }
 }
 
+/* Orders section */
+.orders-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 48px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.orders-section h2 {
+  color: #2e7d32;
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.order-header h3 {
+  color: #2e7d32;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.order-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.order-status.pending {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.order-status.accepted {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.order-status.preparing {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.order-status.ready {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.order-items-list {
+  margin-bottom: 16px;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+  color: #424242;
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+}
+
+.order-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.order-info p {
+  margin: 8px 0;
+  color: #424242;
+  font-size: 0.95rem;
+}
+
+.order-info strong {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.update-status-button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 16px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.update-status-button:hover {
+  background: #43a047;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.no-orders {
+  text-align: center;
+  padding: 48px;
+  color: #757575;
+}
+
+.no-orders svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #9e9e9e;
+}
+
+.error-message {
+  color: #d32f2f;
+  text-align: center;
+  padding: 24px;
+  background: #ffebee;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .hero-section-RA {
@@ -491,6 +644,29 @@
   .registration-status,
   .admin-section {
     padding: 24px 16px;
+  }
+
+  .orders-section {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-card {
+    padding: 16px;
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .order-status {
+    align-self: flex-start;
   }
 }
   

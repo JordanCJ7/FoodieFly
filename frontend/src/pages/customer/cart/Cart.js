@@ -77,8 +77,8 @@ function Cart() {
                     quantity: parseInt(item.quantity || 1),
                     img: item.img || item.image || '/placeholder-food-image.jpg',
                     totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1),
-                    restaurant_id: item.restaurant_id || '',
-                    restaurant_name: item.restaurant_name || 'Unknown Restaurant'
+                    restaurant_id: item.restaurant_id || item.restaurant?._id || '',
+                    restaurant_name: item.restaurant_name || item.restaurant || 'Unknown Restaurant'
                 };
             });
 
@@ -413,14 +413,16 @@ function Cart() {
                 quantity: item.quantity,
                 price: item.price,
                 name: item.name,
+                restaurant_id: item.restaurant_id,
                 restaurant_name: item.restaurant_name
             })),
             totalAmount: totalAmount,
             deliveryFee: deliveryFee,
+            restaurantId: selectedCartItems[0]?.restaurant_id || '',
             restaurantName: selectedCartItems[0]?.restaurant_name || 'Unknown Restaurant'
         };
 
-        console.log('Order data being sent to payment:', orderData);
+        console.log('Order data being sent to payment with restaurant info:', orderData);
 
         // Navigate to payment page with order details
         navigate('/payment/paypal', { 

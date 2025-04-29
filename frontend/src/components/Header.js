@@ -5,7 +5,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import ListAltIcon from "@mui/icons-material/ListAlt";
@@ -14,7 +13,6 @@ import Swal from 'sweetalert2';
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [notificationCount, setNotificationCount] = useState(0);
   const navigate = useNavigate();
 
   // Check if the user is logged in by verifying the presence of the auth token
@@ -125,31 +123,6 @@ function Header() {
     }
   }, [isLoggedIn]);
 
-  // Fetch notifications count
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      const token = localStorage.getItem("auth_token");
-      if (!token) return;
-
-      try {
-        const response = await fetch("http://localhost:5003/api/notifications/count", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setNotificationCount(data.count || 0);
-        }
-      } catch (err) {
-        console.error("Error fetching notifications:", err);
-      }
-    };
-
-    if (isLoggedIn) {
-      fetchNotifications();
-    }
-  }, [isLoggedIn]);
-
   return (
     <>
       <header className="header">
@@ -191,10 +164,6 @@ function Header() {
                 <button className="icon-button cart-button" onClick={() => navigate('/cart')}>
                   <ShoppingCartIcon />
                   {cartItemCount > 0 && <span className="badge">{cartItemCount}</span>}
-                </button>
-                <button className="icon-button notification-button" onClick={() => navigate('/notifications')}>
-                  <NotificationsIcon />
-                  {notificationCount > 0 && <span className="badge">{notificationCount}</span>}
                 </button>
                 <button className="text-button" onClick={handleSignOut}>
                   Sign Out

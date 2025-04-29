@@ -8,7 +8,7 @@ exports.placeOrder = async (req, res) => {
     try {
         console.log("Received order data:", req.body); // Debugging
 
-        const { items, totalAmount, deliveryFee, restaurantName, paypalOrderId, payerName, paymentStatus } = req.body;
+        const { items, totalAmount, deliveryFee, restaurantName, restaurantId, paypalOrderId, payerName, paymentStatus } = req.body;
         
         // Validate required fields
         if (!items || !Array.isArray(items) || items.length === 0) {
@@ -25,12 +25,14 @@ exports.placeOrder = async (req, res) => {
         // Create new order with multiple items
         const order = new Order({
             customerId,
+            restaurantId: restaurantId || items[0]?.restaurant_id || '',
             restaurantName: restaurantName || items[0]?.restaurant_name || 'Unknown Restaurant',
             items: items.map(item => ({
                 itemId: item.itemId,
                 quantity: item.quantity,
                 price: item.price,
-                name: item.name
+                name: item.name,
+                restaurant_id: item.restaurant_id || ''
             })),
             totalAmount: totalAmount || items.reduce((total, item) => total + (item.price * item.quantity), 0),
             deliveryFee: deliveryFee || 200,
@@ -40,7 +42,7 @@ exports.placeOrder = async (req, res) => {
             paymentStatus
         });
 
-        console.log("Creating order:", JSON.stringify(order, null, 2)); // Debug log
+        console.log("Creating order with restaurant info:", JSON.stringify(order, null, 2)); // Debug log
         await order.save();
         console.log("Order saved successfully:", JSON.stringify(order, null, 2)); // Debug log
 

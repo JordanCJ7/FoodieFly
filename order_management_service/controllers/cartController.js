@@ -56,7 +56,7 @@ exports.addToCart = async (req, res) => {
       console.log("Updating existing item quantity from", existingItem.quantity, "to", existingItem.quantity + quantity);
       existingItem.quantity += quantity;
     } else {
-      console.log("Adding new item to cart:", { 
+      console.log("Adding new item to cart with restaurant info:", { 
         itemId: itemObjectId, 
         name, 
         price, 
@@ -120,22 +120,17 @@ exports.getUserCart = async (req, res) => {
     }
 
     // Process items to ensure consistent structure
-    const processedItems = cart.items.map(item => {
-      console.log("Processing cart item:", item);
-      return {
-        _id: item._id.toString(),
-        itemId: item.itemId.toString(),
-        name: item.name || '',
-        price: parseFloat(item.price || 0),
-        quantity: parseInt(item.quantity || 1),
-        img: item.img || '',
-        totalPrice: parseFloat(item.price || 0) * parseInt(item.quantity || 1),
-        restaurant_id: item.restaurant_id ? item.restaurant_id.toString() : '',
-        restaurant_name: item.restaurant_name || 'Unknown Restaurant'
-      };
-    });
+    const processedItems = cart.items.map(item => ({
+      itemId: item.itemId.toString(),
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      img: item.img,
+      restaurant_id: item.restaurant_id ? item.restaurant_id.toString() : null,
+      restaurant_name: item.restaurant_name
+    }));
 
-    console.log("Sending processed items:", JSON.stringify(processedItems, null, 2));
+    console.log("Processed cart items with restaurant info:", processedItems);
     res.json({ items: processedItems });
   } catch (err) {
     console.error("Error fetching cart:", err);

@@ -260,7 +260,9 @@ exports.getHomeMenuItems = async (req, res) => {
       description: item.description,
       price: item.price,
       image: item.image,
-      restaurant: item.restaurantId ? item.restaurantId.restaurantName : "Unknown Restaurant"
+      restaurant: item.restaurantId ? item.restaurantId.restaurantName : "Unknown Restaurant",
+      restaurant_id: item.restaurantId ? item.restaurantId._id.toString() : '',
+      restaurant_name: item.restaurantId ? item.restaurantId.restaurantName : "Unknown Restaurant"
     }));
 
     res.json({

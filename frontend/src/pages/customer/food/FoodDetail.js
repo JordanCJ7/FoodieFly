@@ -34,13 +34,13 @@ function FoodDetail() {
         const itemWithRestaurant = {
           ...item,
           _id: item._id || item.id, // Ensure we have _id
-          restaurant_id: item.restaurant?._id || item.restaurant_id || item.restaurantId,
-          restaurant_name: item.restaurant || item.restaurant_name || item.restaurantName,
+          restaurant_id: item.restaurant_id || item.restaurantId || item.restaurant?._id || '',
+          restaurant_name: item.restaurant_name || item.restaurant || item.restaurantName || 'Unknown Restaurant',
           image: item.image || item.img,
           price: parseFloat(item.price) // Ensure price is a number
         };
 
-        console.log('Processed food item:', itemWithRestaurant); // Debug log
+        console.log('Processed food item with restaurant info:', itemWithRestaurant); // Debug log
         setFoodItem(itemWithRestaurant);
       } catch (err) {
         console.error('Error fetching food item:', err);
@@ -90,11 +90,11 @@ function FoodDetail() {
         price: parseFloat(foodItem.price), // Ensure price is a number
         quantity: parseInt(quantity), // Ensure quantity is a number
         img: foodItem.image || foodItem.img,
-        restaurant_id: foodItem.restaurant_id,
-        restaurant_name: foodItem.restaurant_name
+        restaurant_id: foodItem.restaurant_id || foodItem.restaurant?._id || '',
+        restaurant_name: foodItem.restaurant_name || foodItem.restaurant || 'Unknown Restaurant'
       };
 
-      console.log('Adding to cart:', cartItem); // Debug log
+      console.log('Adding to cart with restaurant info:', cartItem); // Debug log
 
       const response = await fetch("http://localhost:5003/api/cart", {
         method: "POST",

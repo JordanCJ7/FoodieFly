@@ -28,6 +28,7 @@ import Notifications from "./pages/customer/notifications/Notifications";
 import RestaurantList from "./pages/customer/restaurant/RestaurantList";
 import RestaurantDetail from "./pages/customer/restaurant/RestaurantDetail";
 import PayPalCheckout from "./pages/customer/payment/PayPalCheckout";
+import OrderHistory from './pages/RestaurantAdmin/orderHistory/OrderHistory';
 
 function App() {
   return (
@@ -63,6 +64,10 @@ function App() {
     <Route path="/delivery-home/order_status" element={<OrderRequestDriverStatus/>}/>
     <Route path="/delivery-home/delivery_status" element={<DeliveryStatus/>}/>
     <Route path="/restuarant-home/delivery_status" element={<DeliveryRequestStatus/>}/>
+
+    {/* Restaurant Admin Routes */}
+    <Route path="/restaurant-admin/home" element={<RestaurantHome />} />
+    <Route path="/restaurant-admin/order-history" element={<OrderHistory />} />
 
       </Routes>
     </BrowserRouter>

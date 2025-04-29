@@ -187,7 +187,7 @@ function Home() {
         <List.Item
           key={order._id}
           actions={[
-            status === 'Ready' && (
+            order.status === 'Pending' && (
               <Button 
                 type="primary" 
                 icon={<CheckOutlined />}
@@ -196,7 +196,7 @@ function Home() {
                 Accept Order
               </Button>
             ),
-            status === 'Accepted' && (
+            (order.status === 'Accepted' || order.status === 'Ready') && (
               <Button 
                 type="primary" 
                 icon={<CarOutlined />}
@@ -205,7 +205,7 @@ function Home() {
                 Start Delivery
               </Button>
             ),
-            status === 'In Delivery' && (
+            order.status === 'In Delivery' && (
               <Button 
                 type="primary" 
                 icon={<DeliveredProcedureOutlined />}
@@ -214,7 +214,7 @@ function Home() {
                 Complete Delivery
               </Button>
             ),
-            status === 'Ready' && (
+            order.status === 'Pending' && (
               <Button 
                 danger 
                 icon={<CloseOutlined />}

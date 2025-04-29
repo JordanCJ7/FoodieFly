@@ -9,17 +9,22 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
 
 function Home() {
   const navigate = useNavigate();
-  const [registrationStatus, setRegistrationStatus] = useState("pending"); 
-  const [loading, setLoading] = useState(true); 
+  const [registrationStatus, setRegistrationStatus] = useState("pending");
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [orderLoading, setOrderLoading] = useState(true);
+  const [orderError, setOrderError] = useState(null);
 
   // Fetch restaurant verification status from the backend
   useEffect(() => {
     const fetchRestaurantStatus = async () => {
       try {
-        const token = localStorage.getItem("auth_token"); 
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           console.error("Authentication token is missing.");
           setLoading(false);
@@ -33,25 +38,155 @@ function Home() {
         });
 
         if (response.status === 200) {
-          const { isVerified } = response.data; 
+          const { isVerified } = response.data;
           setRegistrationStatus(isVerified ? "approved" : "pending");
         }
       } catch (error) {
         console.error("Error fetching restaurant status:", error);
         if (error.response && error.response.status === 404) {
-          setRegistrationStatus("rejected"); 
+          setRegistrationStatus("rejected");
         } else {
           alert(`Error: ${error.response?.data?.error || "An unexpected error occurred."}`);
         }
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchRestaurantStatus();
   }, []);
 
-  
+  // Fetch restaurant orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          setOrderError("Authentication token is missing.");
+          setOrderLoading(false);
+          return;
+        }
+
+        // First get the restaurant ID
+        const restaurantIdResponse = await axios.get("http://localhost:5004/api/restaurants/get-restaurant-id", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!restaurantIdResponse.data || !restaurantIdResponse.data.restaurantId) {
+          console.error('Could not get restaurant ID:', restaurantIdResponse.data);
+          setOrderError("Could not find restaurant information.");
+          setOrderLoading(false);
+          return;
+        }
+
+        const restaurantId = restaurantIdResponse.data.restaurantId;
+        console.log('Restaurant ID:', restaurantId);
+
+        // Get restaurant details
+        const restaurantResponse = await axios.get(`http://localhost:5004/api/restaurants/${restaurantId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!restaurantResponse.data || !restaurantResponse.data._id) {
+          console.error('Invalid restaurant data:', restaurantResponse.data);
+          setOrderError("Could not find restaurant information.");
+          setOrderLoading(false);
+          return;
+        }
+
+        const restaurant = restaurantResponse.data;
+        console.log('Restaurant Profile:', restaurant);
+
+        // Fetch orders for this restaurant
+        const ordersResponse = await axios.get(`http://localhost:5003/api/order/restaurant/${restaurantId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        console.log('Orders Response:', ordersResponse.data);
+
+        if (ordersResponse.data) {
+          // Transform the data to match MyOrders.js format
+          const formattedOrders = ordersResponse.data.map(order => ({
+            _id: order._id,
+            restaurantId: restaurantId,
+            restaurantName: restaurant.restaurantName,
+            items: order.items.map(item => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            deliveryFee: order.deliveryFee || 200,
+            totalAmount: order.totalAmount,
+            status: order.status || 'Pending',
+            createdAt: order.createdAt,
+            customerName: order.payerName,
+            paymentStatus: order.paymentStatus
+          }));
+          console.log('Formatted Orders:', formattedOrders);
+          setOrders(formattedOrders);
+          setOrderError(null);
+        } else {
+          setOrders([]);
+        }
+      } catch (err) {
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+          endpoint: err.config?.url
+        });
+        const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message;
+        setOrderError("Error fetching restaurant details: " + errorMessage);
+        setOrders([]);
+      } finally {
+        setOrderLoading(false);
+      }
+    };
+
+    if (registrationStatus === "approved") {
+      fetchOrders();
+      // Set up polling to refresh orders every 30 seconds
+      const interval = setInterval(fetchOrders, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [registrationStatus]);
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setOrderError("Authentication token is missing.");
+        return;
+      }
+
+      // Update order status in Order Management service
+      const response = await axios.put(
+        `http://localhost:5003/api/orders/${orderId}/update-status`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+
+      if (response.data) {
+        // Update the order status in the local state
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order._id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        console.log(`Order ${orderId} status updated to ${newStatus}`);
+      }
+    } catch (err) {
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        endpoint: err.config?.url
+      });
+      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message;
+      alert("Error updating order status: " + errorMessage);
+    }
+  };
+
   const handleButtonClick = () => {
     navigate("/restaurant-register");
   };
@@ -75,6 +210,15 @@ function Home() {
     );
   }
 
+  const getNextStatus = (currentStatus) => {
+    const statusFlow = {
+      'Pending': 'Accepted',
+      'Accepted': 'Preparing',
+      'Preparing': 'Ready'
+    };
+    return statusFlow[currentStatus] || null;
+  };
+
   return (
     <div className="home-container-RA">
       <div className="hero-section-RA">
@@ -96,6 +240,61 @@ function Home() {
           </button>
         </div>
       </div>
+
+      {registrationStatus === "approved" && (
+        <div className="orders-section">
+          <h2>Manage Orders</h2>
+          {orderLoading ? (
+            <div className="loading-indicator">
+              <HourglassEmptyIcon fontSize="large" />
+              <p>Loading orders...</p>
+            </div>
+          ) : orderError ? (
+            <div className="error-message">{orderError}</div>
+          ) : orders.length === 0 ? (
+            <div className="no-orders">
+              <FastfoodIcon fontSize="large" />
+              <p>No orders yet</p>
+            </div>
+          ) : (
+            <div className="orders-grid">
+              {orders.map((order) => (
+                <div key={order._id} className={`order-card ${order.status.toLowerCase()}`}>
+                  <div className="order-header">
+                    <h3>Order #{order._id.slice(-6)}</h3>
+                    <span className={`order-status ${order.status.toLowerCase()}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <div className="order-details">
+                    <div className="order-items-list">
+                      {order.items.map((item, index) => (
+                        <div key={index} className="order-item-row">
+                          <span>{item.name}</span>
+                          <span>×{item.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="order-info">
+                      <p><strong>Total:</strong> LKR {order.totalAmount.toFixed(2)}</p>
+                      <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    {getNextStatus(order.status) && (
+                      <button
+                        className="update-status-button"
+                        onClick={() => handleUpdateOrderStatus(order._id, getNextStatus(order.status))}
+                      >
+                        Mark as {getNextStatus(order.status)}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="features-section">
         <div className="feature">
           <div className="feature-icon">
@@ -119,6 +318,7 @@ function Home() {
           <p>Monitor deliveries in real-time and optimize your delivery fleet for maximum efficiency.</p>
         </div>
       </div>
+
       <div className="registration-status">
         <h2>Registration Status</h2>
         <div className={`status-indicator ${registrationStatus}`}>

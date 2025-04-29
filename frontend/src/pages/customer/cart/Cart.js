@@ -380,43 +380,58 @@ function Cart() {
         }
     
         const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
-    
-        try {
-            for (const item of selectedCartItems) {
-                const orderData = {
-                    itemId: item._id,
-                    quantity: item.quantity,
-                    totalPrice: item.price * item.quantity
-                };
-    
-                await axios.post(
-                    "http://localhost:5003/api/order/add",
-                    orderData,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-            }
-    
-            Swal.fire({
-                title: 'Success!',
-                text: 'Order placed successfully!',
-                icon: 'success',
-                confirmButtonColor: '#2ecc71',
-                timer: 2000,
-                timerProgressBar: true
-            });
 
-            const remainingCartItems = cartItems.filter(item => !selectedItems.includes(item._id));
-            setCartItems(remainingCartItems);
-            setSelectedItems([]);
-        } catch (error) {
-            console.error("Error placing order:", error.response?.data || error.message);
+        // Check if items are from the same restaurant
+        const firstRestaurantId = selectedCartItems[0]?.restaurant_id;
+        const hasMultipleRestaurants = selectedCartItems.some(
+            item => item.restaurant_id !== firstRestaurantId
+        );
+
+        if (hasMultipleRestaurants) {
             Swal.fire({
-                title: 'Error!',
-                text: 'Failed to place order. Please try again.',
-                icon: 'error',
-                confirmButtonColor: '#e74c3c'
+                title: 'Invalid Selection',
+                text: 'You can only checkout items from the same restaurant in a single order.',
+                icon: 'warning',
+                confirmButtonColor: '#2ecc71',
+                position: 'top-end',
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false
             });
+            return;
         }
+
+        // Calculate totals
+        const itemsTotal = selectedCartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+        const deliveryFee = 200;
+        const totalAmount = itemsTotal + deliveryFee;
+
+        // Prepare order data
+        const orderData = {
+            items: selectedCartItems.map(item => ({
+                itemId: item._id,
+                quantity: item.quantity,
+                price: item.price,
+                name: item.name,
+                restaurant_name: item.restaurant_name
+            })),
+            totalAmount: totalAmount,
+            deliveryFee: deliveryFee,
+            restaurantName: selectedCartItems[0]?.restaurant_name || 'Unknown Restaurant'
+        };
+
+        console.log('Order data being sent to payment:', orderData);
+
+        // Navigate to payment page with order details
+        navigate('/payment/paypal', { 
+            state: { 
+                orderData,
+                selectedItems,
+                selectedCartItems,
+                cartItems,
+                totalAmount: totalAmount
+            } 
+        });
     };
 
     // Calculate totals with restaurant-based delivery fee
@@ -556,38 +571,7 @@ function Cart() {
                     <button
                         className="checkout-button"
                         disabled={selectedItems.length === 0}
-                        onClick={() => {
-                            // Get the selected cart items
-                            const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
-                            
-                            // Get the restaurant ID of the first selected item
-                            const firstRestaurantId = selectedCartItems[0]?.restaurant_id;
-                            
-                            // Check if all items are from the same restaurant
-                            const hasMultipleRestaurants = selectedCartItems.some(
-                                item => item.restaurant_id !== firstRestaurantId
-                            );
-
-                            if (hasMultipleRestaurants) {
-                                Swal.fire({
-                                    title: 'Invalid Selection',
-                                    text: 'You can only checkout items from the same restaurant in a single order.',
-                                    icon: 'warning',
-                                    confirmButtonColor: '#2ecc71'
-                                });
-                                return;
-                            }
-
-                            // If we get here, all items are from the same restaurant
-                            navigate('/payment/paypal', { 
-                                state: { 
-                                    selectedItems,
-                                    selectedCartItems,
-                                    cartItems,
-                                    totalAmount: totalPrice
-                                } 
-                            });
-                        }}
+                        onClick={handleCheckout}
                     >
                         CHECK OUT ({selectedItems.length} items)
                     </button>

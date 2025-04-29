@@ -6,14 +6,16 @@ import Swal from 'sweetalert2';
 function PayPalCheckout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedItems = [], cartItems = [] } = location.state || {};
+  const { orderData, selectedItems = [], cartItems = [] } = location.state || {};
   const [sdkReady, setSdkReady] = useState(false);
 
-  // Calculate total
-  const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
-  const selectedTotal = selectedCartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const deliveryFee = selectedCartItems.length > 0 ? 200 : 0;
-  const totalPrice = selectedTotal + deliveryFee;
+  // Calculate total from orderData if available, otherwise calculate from items
+  const totalPrice = orderData?.totalAmount || (() => {
+    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
+    const selectedTotal = selectedCartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    const deliveryFee = selectedCartItems.length > 0 ? 200 : 0;
+    return selectedTotal + deliveryFee;
+  })();
 
   useEffect(() => {
     const loadPayPalScript = async () => {
@@ -38,7 +40,7 @@ function PayPalCheckout() {
   }, []);
 
   useEffect(() => {
-    if (sdkReady && window.paypal && selectedCartItems.length > 0) {
+    if (sdkReady && window.paypal && orderData) {
       const paypalContainer = document.getElementById('paypal-button-container');
       if (paypalContainer) {
         paypalContainer.innerHTML = '';
@@ -67,27 +69,21 @@ function PayPalCheckout() {
                 throw new Error('Authentication token not found');
               }
 
-              // Create orders in the order service
-              const createdOrders = [];
-              for (const item of selectedCartItems) {
-                const orderData = {
-                  itemId: item._id,
-                  quantity: item.quantity,
-                  totalPrice: item.price * item.quantity
-                };
+              console.log('Creating order with data:', orderData);
 
-                try {
-                  const orderResponse = await axios.post(
-                    "http://localhost:5003/api/order/add",
-                    orderData,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
-                  createdOrders.push(orderResponse.data);
-                } catch (error) {
-                  console.error('Error creating order:', error);
-                  throw new Error('Failed to create order');
-                }
-              }
+              // Create a single order with all items
+              const orderResponse = await axios.post(
+                "http://localhost:5003/api/order/add",
+                {
+                  ...orderData,
+                  paypalOrderId: details.id,
+                  payerName: `${payer.name.given_name} ${payer.name.surname}`,
+                  paymentStatus: 'Completed'
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              console.log('Order creation response:', orderResponse.data);
 
               // Save payment details
               await axios.post('http://localhost:5010/api/payment/paypalDetails', {
@@ -120,15 +116,13 @@ function PayPalCheckout() {
                 text: `Thank you for your purchase, ${payer.name.given_name}!`,
                 icon: 'success',
                 confirmButtonColor: '#2ecc71',
+                position: 'top-end',
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false
               }).then(() => {
-                // Navigate to order tracking page with the created orders
-                navigate('/my-orders', { 
-                  state: { 
-                    orderId: details.id,
-                    success: true,
-                    orders: createdOrders
-                  } 
-                });
+                // Navigate to order tracking page with the created order
+                navigate('/my-orders', { state: { order: orderResponse.data, success: true, orderId: details.id } });
               });
             } catch (error) {
               console.error('Payment/Order Error:', error);
@@ -137,6 +131,10 @@ function PayPalCheckout() {
                 text: error.message || 'There was an error processing your payment/order.',
                 icon: 'error',
                 confirmButtonColor: '#e74c3c',
+                position: 'top-end',
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false
               });
             }
           },
@@ -147,15 +145,19 @@ function PayPalCheckout() {
               text: 'There was an error with PayPal. Please try again.',
               icon: 'error',
               confirmButtonColor: '#e74c3c',
+              position: 'top-end',
+              toast: true,
+              timer: 3000,
+              showConfirmButton: false
             });
           },
         }).render('#paypal-button-container');
       }
     }
-  }, [sdkReady, selectedCartItems, totalPrice, navigate]);
+  }, [sdkReady, orderData, totalPrice, navigate]);
 
-  if (!selectedCartItems.length) {
-    return <div>No items selected for payment.</div>;
+  if (!orderData) {
+    return <div>No order data available for payment.</div>;
   }
 
   return (
@@ -165,7 +167,19 @@ function PayPalCheckout() {
         <strong>Total to Pay:</strong> LKR {totalPrice.toFixed(2)}
       </div>
       <div id="paypal-button-container"></div>
-      <button style={{ marginTop: 24 }} onClick={() => navigate(-1)}>Back to Cart</button>
+      <button 
+        style={{ 
+          marginTop: 24,
+          padding: '8px 16px',
+          backgroundColor: '#f0f0f0',
+          border: 'none',
+          borderRadius: 4,
+          cursor: 'pointer'
+        }} 
+        onClick={() => navigate(-1)}
+      >
+        Back to Cart
+      </button>
     </div>
   );
 }

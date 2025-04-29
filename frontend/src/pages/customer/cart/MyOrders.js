@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./MyOrders.css";
 
 function MyOrders() {
@@ -8,6 +8,7 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const fetchOrders = async () => {
     const token = localStorage.getItem("auth_token");
@@ -70,13 +71,18 @@ function MyOrders() {
     }
 
     try {
-      const endpoint = action === 'confirm' 
-        ? `http://localhost:5003/api/order/complete/${orderId}`
-        : `http://localhost:5003/api/order/cancel/${orderId}`;
-      
-      await axios.post(endpoint, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (action === 'confirm') {
+        await axios.post(`http://localhost:5003/api/order/complete/${orderId}`, 
+          { status: 'Completed' },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      } else {
+        await axios.post(`http://localhost:5003/api/order/cancel/${orderId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       
       // Refresh orders after confirmation/rejection
       fetchOrders();
@@ -95,11 +101,16 @@ function MyOrders() {
 
   return (
     <div className="orders-container">
-      <h2>My Orders</h2>
+      <div className="orders-header">
+        <h2>My Orders</h2>
+        <button className="view-order-history" onClick={() => navigate('/order-history')}>
+          View Order History
+        </button>
+      </div>
       {orders.length === 0 ? (
-        <p>No orders placed yet.</p>
+        <p>No active orders.</p>
       ) : (
-        orders.map((order) => (
+        orders.filter(order => order.status !== 'Completed' && order.status !== 'Cancelled').map((order) => (
           <div key={order._id} className="order-card">
             <p><strong>Order ID:</strong> {order._id}</p>
             <p><strong>Restaurant:</strong> {order.restaurantName || 'N/A'}</p>

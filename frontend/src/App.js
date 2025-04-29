@@ -15,6 +15,7 @@ import MenuItemEdit from "./pages/RestaurantAdmin/menuItem/MenuItemEdit";
 import ManageUsers from "./pages/systemAdmin/manageUsers/ManageUsers";
 import Cart from "./pages/customer/cart/Cart";//Piumi
 import MyOrders from "./pages/customer/cart/MyOrders";
+import OrderHistory from "./pages/customer/cart/OrderHistory";
 import PaymentDetails from "./pages/customer/payment/PaymentDetails";//Thamindu
 import Profile from "./pages/customer/profile/Profile";
 import PaymentForm from "./pages/customer/payment/PaymentForm";
@@ -28,7 +29,7 @@ import Notifications from "./pages/customer/notifications/Notifications";
 import RestaurantList from "./pages/customer/restaurant/RestaurantList";
 import RestaurantDetail from "./pages/customer/restaurant/RestaurantDetail";
 import PayPalCheckout from "./pages/customer/payment/PayPalCheckout";
-import OrderHistory from './pages/RestaurantAdmin/orderHistory/OrderHistory';
+import RestaurantOrderHistory from './pages/RestaurantAdmin/orderHistory/OrderHistory';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
       <Route path="/manage-users" element={<ManageUsers />} />
       <Route path="/cart" element={<Cart/>}/>
       <Route path="/my-orders" element={<MyOrders />} />
+      <Route path="/order-history" element={<OrderHistory />} />
       <Route path="/payment" element={<PaymentForm/>}/>
       <Route path="/payment-details" element={<PaymentDetails/>}/>
       <Route path="/profile" element={<Profile />} />
@@ -67,7 +69,7 @@ function App() {
 
     {/* Restaurant Admin Routes */}
     <Route path="/restaurant-admin/home" element={<RestaurantHome />} />
-    <Route path="/restaurant-admin/order-history" element={<OrderHistory />} />
+    <Route path="/restaurant-admin/order-history" element={<RestaurantOrderHistory />} />
 
       </Routes>
     </BrowserRouter>

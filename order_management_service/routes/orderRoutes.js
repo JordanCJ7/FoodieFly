@@ -19,4 +19,7 @@ router.get('/restaurant/:restaurantId', verifyToken , verifyRole(['restaurantAdm
 router.get('/restaurant/:restaurantId/history', verifyToken, verifyRole(['restaurantAdmin']), getRestaurantOrderHistory);
 router.put('/:id/status', verifyToken, verifyRole(['restaurantAdmin', 'deliveryPersonnel']), updateOrderStatus);//checked
 
+// Complete an order
+router.post('/complete/:id', verifyToken, verifyRole(['customer']), updateOrderStatus);
+
 module.exports = router;

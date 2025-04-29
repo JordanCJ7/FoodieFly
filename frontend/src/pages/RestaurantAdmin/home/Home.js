@@ -11,6 +11,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
+import RestaurantNavbar from '../../../components/RestaurantNavbar/RestaurantNavbar';
 
 function Home() {
   const navigate = useNavigate();
@@ -167,10 +168,22 @@ function Home() {
 
       if (response.data) {
         if (newStatus === 'Cancelled') {
-          // Remove the cancelled order from the local state
+          // Remove the cancelled order immediately
           setOrders(prevOrders => prevOrders.filter(order => order._id !== orderId));
+        } else if (newStatus === 'Ready') {
+          // Update the order status first
+          setOrders(prevOrders => 
+            prevOrders.map(order => 
+              order._id === orderId ? { ...order, status: newStatus } : order
+            )
+          );
+          
+          // After 10 seconds, remove from active orders without changing status
+          setTimeout(() => {
+            setOrders(prevOrders => prevOrders.filter(order => order._id !== orderId));
+          }, 10000); // 10 seconds
         } else {
-          // Update the order status in the local state
+          // For other status changes, just update the status
           setOrders(prevOrders => 
             prevOrders.map(order => 
               order._id === orderId ? { ...order, status: newStatus } : order
@@ -219,6 +232,7 @@ function Home() {
 
   return (
     <div className="home-container-RA">
+      <RestaurantNavbar />
       <div className="hero-section-RA">
         <h1>FoodieFly - Food Ordering & Delivery System</h1>
         <p className="subtitle-RA">
@@ -235,6 +249,9 @@ function Home() {
           </button>
           <button className="secondary-button-RA" onClick={handleViewMenuButtonClick}>
             View your Menus
+          </button>
+          <button className="secondary-button-RA" onClick={() => navigate('/restaurant-admin/order-history')}>
+            View Order History
           </button>
         </div>
       </div>

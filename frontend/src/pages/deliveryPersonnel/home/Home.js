@@ -10,7 +10,8 @@ import {
   CheckOutlined,
   CloseOutlined,
   CarOutlined,
-  DeliveredProcedureOutlined
+  DeliveredProcedureOutlined,
+  HistoryOutlined
 } from '@ant-design/icons';
 import axios from "axios";
 import "./Home.css";
@@ -20,6 +21,7 @@ function Home() {
   const [readyOrders, setReadyOrders] = useState([]);
   const [acceptedOrdersList, setAcceptedOrdersList] = useState([]);
   const [inDeliveryOrdersList, setInDeliveryOrdersList] = useState([]);
+  const [completedOrdersList, setCompletedOrdersList] = useState([]);
   const [deliveryStats, setDeliveryStats] = useState({
     totalDeliveries: 0,
     completedDeliveries: 0,
@@ -137,12 +139,16 @@ function Home() {
       });
 
       message.success('Order delivered successfully');
+      const deliveredOrder = inDeliveryOrdersList.find(order => order._id === orderId);
       setInDeliveryOrdersList(inDeliveryOrdersList.filter(order => order._id !== orderId));
-      // Update delivery stats
+      setCompletedOrdersList([deliveredOrder, ...completedOrdersList]);
+      
+      // Update delivery stats with earnings
       setDeliveryStats(prev => ({
         ...prev,
         completedDeliveries: prev.completedDeliveries + 1,
-        totalDeliveries: prev.totalDeliveries + 1
+        totalDeliveries: prev.totalDeliveries + 1,
+        earnings: prev.earnings + 200 // Add 200 per completed delivery
       }));
     } catch (error) {
       console.error('Error marking order as delivered:', error);
@@ -267,7 +273,7 @@ function Home() {
         <Card className="stats-card">
           <Statistic
             title="Total Deliveries"
-            value={deliveryStats.totalDeliveries}
+            value={deliveryStats.completedDeliveries}
             prefix={<CheckCircleOutlined />}
           />
         </Card>
@@ -306,6 +312,59 @@ function Home() {
           <div className="orders-section">
             <h2>In Delivery</h2>
             {renderOrderList(inDeliveryOrdersList, 'In Delivery')}
+          </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane 
+          tab={`Completed Orders (${completedOrdersList.length})`} 
+          key="completed"
+          icon={<HistoryOutlined />}
+        >
+          <div className="orders-section">
+            <h2>Completed Orders</h2>
+            <List
+              itemLayout="vertical"
+              dataSource={completedOrdersList}
+              renderItem={order => (
+                <List.Item
+                  key={order._id}
+                  actions={[
+                    <Button type="default" icon={<PhoneOutlined />}>
+                      Contact Customer
+                    </Button>,
+                    <Button type="default" icon={<EnvironmentOutlined />}>
+                      View Route
+                    </Button>
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar icon={<UserOutlined />} />}
+                    title={`Order #${order._id.slice(-6)}`}
+                    description={
+                      <>
+                        <div>{order.restaurantName}</div>
+                        <Badge status="success" text="Delivered" />
+                      </>
+                    }
+                  />
+                  <div className="delivery-details">
+                    <div><strong>Customer:</strong> {order.customerId?.first_name} {order.customerId?.last_name}</div>
+                    <div><strong>Total Amount:</strong> ${order.totalAmount}</div>
+                    <div><strong>Delivery Fee:</strong> ${order.deliveryFee}</div>
+                    <div><strong>Completed At:</strong> {new Date().toLocaleString()}</div>
+                  </div>
+                  <div className="order-items">
+                    <strong>Items:</strong>
+                    <ul>
+                      {order.items.map((item, index) => (
+                        <li key={index}>
+                          {item.quantity}x {item.name} - ${item.price}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </List.Item>
+              )}
+            />
           </div>
         </Tabs.TabPane>
       </Tabs>

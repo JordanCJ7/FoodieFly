@@ -94,145 +94,159 @@
 }
 
 .status {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: capitalize;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.3s ease;
-  background: #f5f5f5;
-  color: #666;
-}
-
-.status::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 5px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
 .status.pending {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.status.pending::before {
-  background: #2e7d32;
-  animation: pulse 2s infinite;
+  background-color: #fff3e0;
+  color: #f57c00;
 }
 
 .status.accepted {
-  background: #e3f2fd;
-  color: #1565c0;
-}
-
-.status.accepted::before {
-  background: #1565c0;
+  background-color: #e3f2fd;
+  color: #1976d2;
 }
 
 .status.preparing {
-  background: #fff3e0;
-  color: #ef6c00;
-}
-
-.status.preparing::before {
-  background: #ef6c00;
-  animation: spin 2s linear infinite;
-}
-
-.status.ready {
-  background: #e8f5e9;
+  background-color: #e8f5e9;
   color: #2e7d32;
 }
 
-.status.ready::before {
-  background: #2e7d32;
+.status.ready {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status.delivered {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status.completed {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.status.cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.delivery-confirmation-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.confirm-order-button,
+.reject-order-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.confirm-order-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.confirm-order-button:hover {
+  background-color: #43a047;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.reject-order-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.reject-order-button:hover {
+  background-color: #e53935;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
 }
 
 .progress-bar {
   display: flex;
   justify-content: space-between;
-  margin-top: 30px;
-  padding: 20px 10px;
+  align-items: center;
+  margin: 30px 0;
   position: relative;
-  margin-bottom: 10px;
+  padding: 0 20px;
 }
 
 .progress-bar::before {
   content: '';
   position: absolute;
-  top: 36px;
+  top: 50%;
   left: 0;
   right: 0;
-  height: 3px;
-  background: #e8f5e9;
-  z-index: 0;
-  border-radius: 2px;
+  height: 2px;
+  background: #e0e0e0;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .step {
-  flex: 1;
-  text-align: center;
   position: relative;
-  font-size: 0.95rem;
-  color: #81c784;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  transition: all 0.3s ease;
+  z-index: 2;
+  padding: 0 10px;
+  flex: 1;
+  text-align: center;
 }
 
 .step-circle {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background-color: #e8f5e9;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  margin-bottom: 8px;
   transition: all 0.3s ease;
   position: relative;
-  z-index: 1;
-  border: 2px solid #e8f5e9;
-}
-
-.step.active {
-  color: #2e7d32;
-  font-weight: 600;
+  z-index: 2;
 }
 
 .step.active .step-circle {
-  background-color: #4caf50;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  background: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.5);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.step.active {
+  color: #4CAF50;
+  font-weight: 600;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Add a line connecting active steps */
+.step.active::before {
+  content: '';
+  position: absolute;
+  top: 12px; /* Half of step-circle height */
+  left: 0;
+  right: 50%;
+  height: 2px;
+  background: #4CAF50;
+  z-index: 1;
+}
+
+.step.active + .step.active::before {
+  left: -50%;
+  right: 50%;
 }
 
 /* Responsive Design */

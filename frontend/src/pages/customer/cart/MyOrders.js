@@ -9,29 +9,29 @@ function MyOrders() {
   const [error, setError] = useState(null);
   const location = useLocation();
 
+  const fetchOrders = async () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setError("Please log in to view your orders.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get("http://localhost:5003/api/order/customer/orders", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Fetched orders:', response.data);
+      setOrders(response.data);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError("Error fetching orders: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        setError("Please log in to view your orders.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get("http://localhost:5003/api/order/customer/orders", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log('Fetched orders:', response.data);
-        setOrders(response.data);
-      } catch (err) {
-        console.error('Error fetching orders:', err);
-        setError("Error fetching orders: " + (err.response?.data?.error || err.message));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     // If we have a new order from payment, add it to the state first
     if (location.state?.order) {
       console.log('New order from payment:', location.state.order);
@@ -41,6 +41,26 @@ function MyOrders() {
     // Then fetch all orders to ensure we have the latest data
     fetchOrders();
   }, [location.state]);
+
+  const handleCancelOrder = async (orderId) => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setError("Please log in to cancel orders.");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:5003/api/order/cancel/${orderId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Refresh orders after cancellation
+      fetchOrders();
+    } catch (err) {
+      console.error('Error canceling order:', err);
+      setError("Error canceling order: " + (err.response?.data?.error || err.message));
+    }
+  };
 
   if (loading) return <div className="orders-container">Loading your orders...</div>;
   if (error) return <div className="orders-container">{error}</div>;
@@ -62,13 +82,15 @@ function MyOrders() {
             <div className="order-items">
               <strong>Items:</strong>
               {Array.isArray(order.items) ? (
-                order.items.map((item, index) => (
-                  <div key={index} className="order-item">
-                    <p>
-                      {item.name || 'Unknown Item'} × {item.quantity || 0} - LKR {formatPrice((item.price || 0) * (item.quantity || 1))}
-                    </p>
-                  </div>
-                ))
+                <div className="order-items-container">
+                  {order.items.map((item, index) => (
+                    <div key={index} className="order-item">
+                      <p>
+                        {item.name || 'Unknown Item'} × {item.quantity || 0} - LKR {formatPrice((item.price || 0) * (item.quantity || 1))}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="order-item">
                   <p>No items available</p>
@@ -93,6 +115,15 @@ function MyOrders() {
                 </div>
               ))}
             </div>
+
+            {(order.status || 'Pending').toLowerCase() === 'pending' && (
+              <button
+                className="cancel-order-button"
+                onClick={() => handleCancelOrder(order._id)}
+              >
+                Cancel Order
+              </button>
+            )}
           </div>
         ))
       )}

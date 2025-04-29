@@ -151,7 +151,7 @@ function Home() {
     }
   }, [registrationStatus]);
 
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+  const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem("auth_token");
       if (!token) {
@@ -159,31 +159,29 @@ function Home() {
         return;
       }
 
-      // Update order status in Order Management service
       const response = await axios.put(
-        `http://localhost:5003/api/orders/${orderId}/update-status`,
+        `http://localhost:5003/api/order/${orderId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` }}
       );
 
       if (response.data) {
-        // Update the order status in the local state
-        setOrders(prevOrders => 
-          prevOrders.map(order => 
-            order._id === orderId ? { ...order, status: newStatus } : order
-          )
-        );
+        if (newStatus === 'Cancelled') {
+          // Remove the cancelled order from the local state
+          setOrders(prevOrders => prevOrders.filter(order => order._id !== orderId));
+        } else {
+          // Update the order status in the local state
+          setOrders(prevOrders => 
+            prevOrders.map(order => 
+              order._id === orderId ? { ...order, status: newStatus } : order
+            )
+          );
+        }
         console.log(`Order ${orderId} status updated to ${newStatus}`);
       }
     } catch (err) {
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        endpoint: err.config?.url
-      });
-      const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message;
-      alert("Error updating order status: " + errorMessage);
+      console.error(`Error updating order to ${newStatus}:`, err);
+      alert(`Error updating order: ${err.response?.data?.message || err.message}`);
     }
   };
 
@@ -257,34 +255,107 @@ function Home() {
               <p>No orders yet</p>
             </div>
           ) : (
-            <div className="orders-grid">
+            <div className="orders-container">
+              <h2 className="manage-orders-title">Manage Orders</h2>
               {orders.map((order) => (
-                <div key={order._id} className={`order-card ${order.status.toLowerCase()}`}>
-                  <div className="order-header">
-                    <h3>Order #{order._id.slice(-6)}</h3>
-                    <span className={`order-status ${order.status.toLowerCase()}`}>
-                      {order.status}
-                    </span>
+                <div key={order._id} className="order-detail-card">
+                  <div className="order-grid">
+                    <div className="order-field">
+                      <span className="field-label">Order ID:</span>
+                      <span className="field-value">{order._id}</span>
+                    </div>
+                    <div className="order-field">
+                      <span className="field-label">Restaurant:</span>
+                      <span className="field-value">{order.restaurantName}</span>
+                    </div>
+                    <div className="order-field items-field">
+                      <span className="field-label">Items:</span>
+                      <span className="field-value">
+                        {order.items.map((item, index) => (
+                          <span key={index} className="item-entry">
+                            {item.name} × {item.quantity} - LKR {item.price * item.quantity}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                    <div className="order-field">
+                      <span className="field-label">Delivery Fee:</span>
+                      <span className="field-value">LKR {order.deliveryFee.toFixed(2)}</span>
+                    </div>
+                    <div className="order-field">
+                      <span className="field-label">Total Amount:</span>
+                      <span className="field-value">LKR {order.totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="order-field">
+                      <span className="field-label">Order Date:</span>
+                      <span className="field-value">{new Date(order.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="order-field">
+                      <span className="field-label">Status:</span>
+                      <span className="field-value">
+                        <span className={`status-badge ${order.status}`}>{order.status}</span>
+                      </span>
+                    </div>
                   </div>
-                  <div className="order-details">
-                    <div className="order-items-list">
-                      {order.items.map((item, index) => (
-                        <div key={index} className="order-item-row">
-                          <span>{item.name}</span>
-                          <span>×{item.quantity}</span>
-                        </div>
-                      ))}
+
+                  <div className="order-progress">
+                    <div className={`progress-step ${order.status === 'Pending' ? 'active' : ''}`} data-status="Pending">
+                      <div className="step-dot"></div>
+                      <span>Pending</span>
                     </div>
-                    <div className="order-info">
-                      <p><strong>Total:</strong> LKR {order.totalAmount.toFixed(2)}</p>
-                      <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
+                    <div className={`progress-step ${order.status === 'Accepted' ? 'active' : ''}`} data-status="Accepted">
+                      <div className="step-dot"></div>
+                      <span>Accepted</span>
                     </div>
-                    {getNextStatus(order.status) && (
-                      <button
-                        className="update-status-button"
-                        onClick={() => handleUpdateOrderStatus(order._id, getNextStatus(order.status))}
+                    <div className={`progress-step ${order.status === 'Preparing' ? 'active' : ''}`} data-status="Preparing">
+                      <div className="step-dot"></div>
+                      <span>Preparing</span>
+                    </div>
+                    <div className={`progress-step ${order.status === 'Ready' ? 'active' : ''}`} data-status="Ready">
+                      <div className="step-dot"></div>
+                      <span>Ready</span>
+                    </div>
+                  </div>
+
+                  <div className="order-actions">
+                    {order.status === 'Pending' && (
+                      <>
+                        <button 
+                          className="accept-order-btn"
+                          onClick={() => handleStatusChange(order._id, 'Accepted')}
+                        >
+                          Accept Order
+                        </button>
+                        <button 
+                          className="cancel-order-btn"
+                          onClick={() => handleStatusChange(order._id, 'Cancelled')}
+                        >
+                          Cancel Order
+                        </button>
+                      </>
+                    )}
+                    {order.status === 'Accepted' && (
+                      <>
+                        <button 
+                          className="status-btn preparing-btn"
+                          onClick={() => handleStatusChange(order._id, 'Preparing')}
+                        >
+                          Mark as Preparing
+                        </button>
+                        <button 
+                          className="cancel-order-btn"
+                          onClick={() => handleStatusChange(order._id, 'Cancelled')}
+                        >
+                          Cancel Order
+                        </button>
+                      </>
+                    )}
+                    {order.status === 'Preparing' && (
+                      <button 
+                        className="status-btn ready-btn"
+                        onClick={() => handleStatusChange(order._id, 'Ready')}
                       >
-                        Mark as {getNextStatus(order.status)}
+                        Mark as Ready
                       </button>
                     )}
                   </div>

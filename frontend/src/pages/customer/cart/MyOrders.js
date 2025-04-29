@@ -127,18 +127,15 @@ function MyOrders() {
             <p><strong>Status:</strong> <span className={`status ${(order.status || 'pending').toLowerCase()}`}>{order.status || 'Pending'}</span></p>
 
             <div className="progress-bar">
-              {['Pending', 'Accepted', 'Preparing', 'Ready', 'Delivered', 'Completed'].map((status, index, array) => {
-                // Get the current status index
-                const currentStatusIndex = array.indexOf(order.status || 'Pending');
-                const statusIndex = array.indexOf(status);
-                
-                // Determine if this step should be active
-                const isActive = statusIndex <= currentStatusIndex;
+              {['Pending', 'Accepted', 'Preparing', 'Ready', 'In Delivery', 'Delivered', 'Completed'].map((status, index, array) => {
+                const orderStatus = order.status || 'Pending';
+                const orderStatusIndex = array.indexOf(orderStatus);
+                const currentStepIndex = array.indexOf(status);
                 
                 return (
                   <div
                     key={status}
-                    className={`step ${isActive ? 'active' : ''}`}
+                    className={`step ${currentStepIndex <= orderStatusIndex ? 'active' : ''}`}
                   >
                     <div className="step-circle"></div>
                     {status}

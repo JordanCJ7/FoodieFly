@@ -201,6 +201,41 @@ exports.getRestaurantOrderHistory = async (req, res) => {
   }
 };
 
+// Get all orders in Ready state
+exports.getReadyOrders = async (req, res) => {
+  try {
+    console.log('Fetching ready orders...');
+    
+    // Fetch orders that are in Ready state
+    const orders = await Order.find({ 
+      status: 'Ready'
+    })
+    .lean() // Convert to plain JavaScript objects
+    .sort({ updatedAt: -1 }); // Most recent first
+    
+    console.log(`Found ${orders.length} ready orders`);
+    
+    // Since we can't directly populate from a different service,
+    // we'll return the orders without customer details for now
+    const transformedOrders = orders.map(order => ({
+      ...order,
+      customerId: {
+        first_name: 'Customer',
+        last_name: `#${order.customerId.toString().slice(-4)}` // Last 4 chars of customer ID
+      }
+    }));
+    
+    res.json(transformedOrders);
+  } catch (error) {
+    console.error("Error in getReadyOrders:", error);
+    res.status(500).json({ 
+      error: "Error fetching ready orders",
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
 module.exports = {
   placeOrder: exports.placeOrder,
   getOrder: exports.getOrder,
@@ -209,6 +244,7 @@ module.exports = {
   cancelOrder: exports.cancelOrder,
   getOrdersForCustomer: exports.getOrdersForCustomer,
   updateOrder: exports.updateOrder,
-  getRestaurantOrderHistory: exports.getRestaurantOrderHistory
+  getRestaurantOrderHistory: exports.getRestaurantOrderHistory,
+  getReadyOrders: exports.getReadyOrders
 };
 

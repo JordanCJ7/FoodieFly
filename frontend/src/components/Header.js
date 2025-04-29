@@ -132,8 +132,8 @@ function Header() {
             <button className="icon-button menu-button" onClick={toggleSidebar}>
               <MenuIcon />
             </button>
-            <Link to={homeRoute} className="logo-container">
-              <div className="logo">FoodieFly</div>
+            <Link to={getHomeRoute()} className="logo">
+              FoodieFly
             </Link>
           </div>
 

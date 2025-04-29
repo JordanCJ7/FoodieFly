@@ -100,15 +100,34 @@ function PayPalCheckout() {
 
               // Remove paid items from cart
               try {
+                // Get the selected cart items
+                const selectedCartItems = cartItems.filter(item => selectedItems.includes(item._id));
+                // Use the itemId field instead of _id for removal
+                const itemIdsToRemove = selectedCartItems.map(item => item.itemId || item._id);
+                console.log('Removing items from cart using itemIds:', itemIdsToRemove);
+                
                 await axios.post('http://localhost:5003/api/cart/remove-multiple', {
-                  itemIds: selectedItems
+                  itemIds: itemIdsToRemove
                 }, {
                   headers: {
                     Authorization: `Bearer ${token}`,
                   },
                 });
+
+                console.log('Successfully removed items from cart');
               } catch (error) {
-                console.error('Error removing items from cart:', error);
+                console.error('Error removing items from cart:', error.response?.data || error);
+                // Don't block the checkout process, but show a warning
+                Swal.fire({
+                  title: 'Warning',
+                  text: 'Your order was successful, but we could not remove items from your cart. Please try clearing your cart manually.',
+                  icon: 'warning',
+                  confirmButtonColor: '#2ecc71',
+                  position: 'top-end',
+                  toast: true,
+                  timer: 5000,
+                  showConfirmButton: false
+                });
               }
 
               Swal.fire({
@@ -121,8 +140,15 @@ function PayPalCheckout() {
                 timer: 3000,
                 showConfirmButton: false
               }).then(() => {
-                // Navigate to order tracking page with the created order
-                navigate('/my-orders', { state: { order: orderResponse.data, success: true, orderId: details.id } });
+                // Navigate to order tracking page with the created order and force a cart refresh
+                navigate('/my-orders', { 
+                  state: { 
+                    order: orderResponse.data, 
+                    success: true, 
+                    orderId: details.id,
+                    cartRefreshNeeded: true
+                  } 
+                });
               });
             } catch (error) {
               console.error('Payment/Order Error:', error);

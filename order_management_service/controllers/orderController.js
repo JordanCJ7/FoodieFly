@@ -88,8 +88,10 @@ exports.getOrdersForCustomer = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized - No customer ID" });
     }
 
-    // Fetch orders associated with this customer
-    const orders = await Order.find({ customerId });
+    // Fetch orders associated with this customer, sorted by creation date (newest first)
+    const orders = await Order.find({ customerId })
+      .sort({ createdAt: -1 }) // Sort by creation date, newest first
+      .lean(); // Convert to plain JavaScript objects for better performance
 
     // If no orders found, return an empty array
     res.json(orders);
@@ -126,10 +128,40 @@ exports.getOrdersForRestaurant = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json(order);
+    const orderId = req.params.id;
+
+    // Validate order exists
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Validate status transition
+    const validTransitions = {
+      'Delivered': ['Completed', 'Cancelled'],
+      'In Delivery': ['Delivered', 'Cancelled'],
+      'Ready': ['In Delivery', 'Cancelled'],
+      'Preparing': ['Ready', 'Cancelled'],
+      'Accepted': ['Preparing', 'Cancelled'],
+      'Pending': ['Accepted', 'Cancelled']
+    };
+
+    if (!validTransitions[order.status]?.includes(status)) {
+      return res.status(400).json({ 
+        error: `Invalid status transition from ${order.status} to ${status}` 
+      });
+    }
+
+    // Update the order status
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId, 
+      { status }, 
+      { new: true }
+    );
+
+    res.json(updatedOrder);
   } catch (error) {
+    console.error('Error updating order status:', error);
     res.status(500).json({ error: 'Error updating order status' });
   }
 };
